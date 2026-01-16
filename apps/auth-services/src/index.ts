@@ -6,7 +6,7 @@ import {
 } from "@workspace/open-api/lib/open-api-configuration";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
-import auth from "./auth/auth.index";
+import auth from "./auth/auth-index";
 
 const app = new OpenAPIHono({
   defaultHook,

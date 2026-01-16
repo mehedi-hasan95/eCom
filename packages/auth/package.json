@@ -5,7 +5,8 @@
   "dependencies": {
     "better-auth": "^1.4.13",
     "dotenv": "^17.2.3",
-    "@workspace/db": "workspace:*"
+    "@workspace/db": "workspace:*",
+    "@workspace/redis": "workspace:*"
   },
   "devDependencies": {
     "@workspace/typescript-config": "workspace:*"
