@@ -1,4 +1,5 @@
 import { prisma } from "@workspace/db";
+import redis from "@workspace/redis";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { emailOTP } from "better-auth/plugins";
@@ -26,5 +27,34 @@ export const auth = betterAuth({
       disableSignUp: false,
     }),
   ],
+  user: {
+    additionalFields: {
+      role: {
+        type: ["USER", "SELLER"],
+        required: false,
+        defaultValue: "USER",
+      },
+      phone: {
+        type: "string",
+        required: false,
+        defaultValue: undefined,
+      },
+    },
+  },
+  secondaryStorage: {
+    get: async (key) => {
+      return await redis.get(key);
+    },
+    set: async (key, value, ttl) => {
+      if (ttl) {
+        await redis.set(key, value, "EX", ttl);
+      } else {
+        await redis.set(key, value);
+      }
+    },
+    delete: async (key) => {
+      await redis.del(key);
+    },
+  },
   trustedOrigins: ["http://localhost:3000", "http://localhost:6001"],
 });

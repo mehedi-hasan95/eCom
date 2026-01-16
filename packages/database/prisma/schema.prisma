@@ -13,12 +13,20 @@ datasource db {
   provider = "postgresql"
 }
 
+enum userRole {
+  USER
+  SELLER
+  ADMIN
+}
+
 model User {
   id            String    @id
   name          String
   email         String
   emailVerified Boolean
   image         String?
+  role          userRole  @default(USER)
+  phone         String?
   createdAt     DateTime
   updatedAt     DateTime
   sessions      Session[]
@@ -40,8 +48,8 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
-  @@map("session")
   @@index([userId])
+  @@map("session")
 }
 
 model Account {
@@ -60,8 +68,8 @@ model Account {
   createdAt             DateTime
   updatedAt             DateTime
 
-  @@map("account")
   @@index([userId])
+  @@map("account")
 }
 
 model Verification {
@@ -72,6 +80,6 @@ model Verification {
   createdAt  DateTime?
   updatedAt  DateTime?
 
-  @@map("verification")
   @@index([identifier])
+  @@map("verification")
 }
