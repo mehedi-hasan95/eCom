@@ -1,0 +1,27 @@
+{
+  "name": "auth-services",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.9",
+    "@hono/zod-openapi": "^1.2.0",
+    "@hono/zod-validator": "^0.7.6",
+    "dotenv": "^17.2.3",
+    "hono": "^4.11.4",
+    "zod": "^4.3.5",
+    "@workspace/db": "workspace:*",
+    "@workspace/open-api": "workspace:*",
+    "@workspace/redis": "workspace:*",
+    "@workspace/auth": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3",
+    "@workspace/typescript-config": "workspace:*"
+  }
+}

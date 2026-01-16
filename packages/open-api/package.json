@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/open-api",
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/zod-openapi": "^1.2.0",
+    "@scalar/hono-api-reference": "^0.9.33",
+    "hono": "^4.11.4",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@workspace/typescript-config": "workspace:*"
+  },
+  "exports": {
+    "./schemas/*": "./src/schema/*.ts",
+    "./lib/*": "./src/lib/*.ts"
+  }
+}

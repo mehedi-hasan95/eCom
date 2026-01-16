@@ -1,0 +1,23 @@
+{
+  "name": "@workspace/auth",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "better-auth": "^1.4.13",
+    "dotenv": "^17.2.3",
+    "@workspace/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@workspace/typescript-config": "workspace:*"
+  },
+  "exports": {
+    "./server": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./src/auth-client.ts",
+      "default": "./src/auth-client.ts"
+    }
+  }
+}
