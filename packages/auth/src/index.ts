@@ -2,6 +2,7 @@ import { prisma } from "@workspace/db";
 import redis from "@workspace/redis";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { nextCookies } from "better-auth/next-js";
 import { emailOTP } from "better-auth/plugins";
 
 export const auth = betterAuth({
@@ -26,7 +27,24 @@ export const auth = betterAuth({
       },
       disableSignUp: false,
     }),
+    nextCookies(),
   ],
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      partitioned: false,
+    },
+    cookies: {
+      sessionToken: {
+        attributes: {
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+          secure: process.env.NODE_ENV === "production",
+          partitioned: false,
+        },
+      },
+    },
+  },
   user: {
     additionalFields: {
       role: {
