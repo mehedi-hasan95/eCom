@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { AuthLayout } from "./auth-layout";
-import { ModifyOtp } from "@/components/common/modify/modify-otp";
-import { LoadingButton } from "@/components/common/loading-button";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
+import { LoadingButton } from "@/components/common/loading-button";
+import { ModifyOtp } from "@/components/common/modify/modify-otp";
 
 interface Props {
   setOTP: React.Dispatch<React.SetStateAction<string>>;

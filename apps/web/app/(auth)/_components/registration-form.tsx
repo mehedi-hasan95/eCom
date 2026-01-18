@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  emailVerificaionAction,
-  emailVerificaionOTPAction,
-  registrationAction,
-} from "@/components/actions/auth-action";
 import { LoadingButton } from "@/components/common/loading-button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -31,8 +26,15 @@ import z from "zod";
 import { EmailOtpVerification } from "./email-otp-verification";
 import { AuthLayout } from "./auth-layout";
 import { toast } from "sonner";
+import {
+  emailVerificaionAction,
+  emailVerificaionOTPAction,
+  registrationAction,
+} from "@/lib/actions/auth-action";
+import { useRouter } from "next/navigation";
 
 export const RegistrationForm = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState<"register" | "verify">("register");
   const [otp, setOtp] = useState("");
@@ -60,6 +62,10 @@ export const RegistrationForm = () => {
       }
     },
     onError: (error) => {
+      if ((error as { status?: string }).status === "not_acceptable") {
+        router.push(`/verify-email?email=${form.getValues("email")}`);
+        toast.error(error.message);
+      }
       toast.error(error.message);
     },
   });
@@ -73,6 +79,7 @@ export const RegistrationForm = () => {
         toast.success("Success", {
           description: "You have successfully verified.",
         });
+        router.push("/sign-in");
       }
     },
   });
@@ -222,12 +229,12 @@ export const RegistrationForm = () => {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="registration-id-password">
+                    <FieldLabel htmlFor="registration-id-cPassword">
                       Confirm Password
                     </FieldLabel>
                     <Input
                       {...field}
-                      id="registration-id-password"
+                      id="registration-id-cPassword"
                       aria-invalid={fieldState.invalid}
                       placeholder="******"
                       autoComplete="off"

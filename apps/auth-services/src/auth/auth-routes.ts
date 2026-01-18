@@ -1,7 +1,9 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import {
+  emailVerificationSchema,
   loginSchema,
   registrationSchema,
+  resetPasswordSchema,
   verifyRegistrationEmailSchema,
 } from "@workspace/open-api/schemas/auth.schemas";
 
@@ -178,6 +180,111 @@ export const sessionRoute = createRoute({
     },
     401: {
       description: "Unauthorized",
+    },
+  },
+});
+
+export const forgetPasswordEmailRoute = createRoute({
+  method: "post",
+  path: "/forget-password-email",
+  tags,
+  summary: "Forget password email",
+  description:
+    "To reset the user's password with OTP, you need to verify you email first",
+  request: {
+    body: {
+      description: "Forget password email",
+      content: { "application/json": { schema: emailVerificationSchema } },
+    },
+  },
+  responses: {
+    200: {
+      description: "Forget password email",
+      content: {
+        "application/json": { schema: z.object({ success: z.boolean() }) },
+      },
+    },
+    404: {
+      description: "Email not found",
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.boolean().default(false) }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.boolean().default(false) }),
+        },
+      },
+    },
+  },
+});
+
+export const forgetPasswordVerifyRoute = createRoute({
+  method: "post",
+  path: "/forget-password-otp",
+  tags,
+  summary: "Forget password email verify with OTP",
+  description:
+    "Once user reset their password provide their email, then verify the email with OTP",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: verifyRegistrationEmailSchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "OTP match",
+      content: {
+        "application/json": { schema: z.object({ success: z.boolean() }) },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.boolean().default(false) }),
+        },
+      },
+    },
+  },
+});
+
+export const resetPasswordRoute = createRoute({
+  method: "post",
+  path: "/reset-password",
+  tags,
+  summary: "Reset password",
+  description:
+    "After verify user email with OTP now time to reset user's password",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: resetPasswordSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "OTP match",
+      content: {
+        "application/json": { schema: z.object({ success: z.boolean() }) },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.boolean().default(false) }),
+        },
+      },
     },
   },
 });

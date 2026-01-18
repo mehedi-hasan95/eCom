@@ -1,9 +1,12 @@
 import { RouteHandler } from "@hono/zod-openapi";
 import {
+  forgetPasswordEmailRoute,
+  forgetPasswordVerifyRoute,
   loginRoute,
   logoutRoute,
   registrationOtpRoute,
   registrationRoute,
+  resetPasswordRoute,
   sessionRoute,
   verifyRegistrationRoute,
 } from "./auth-routes";
@@ -144,4 +147,77 @@ export const sessionHandler: RouteHandler<typeof sessionRoute> = async (c) => {
     { success: true, user: session.user, session: session.session },
     200,
   );
+};
+
+export const forgetPasswordEmailHandler: RouteHandler<
+  typeof forgetPasswordEmailRoute
+> = async (c) => {
+  const { email } = c.req.valid("json");
+  const inList = await prisma.user.findUnique({ where: { email } });
+  if (!inList) {
+    return c.json(
+      { success: false, message: "Email not found", status: 404 },
+      404,
+    );
+  }
+  await auth.api.forgetPasswordEmailOTP({
+    body: {
+      email,
+    },
+  });
+  return c.json({
+    success: true,
+    message: "A verification OTP sent your email",
+  });
+};
+
+export const forgetPasswordVerifyHandler: RouteHandler<
+  typeof forgetPasswordVerifyRoute
+> = async (c) => {
+  const { email, otp } = c.req.valid("json");
+  try {
+    await auth.api.checkVerificationOTP({
+      body: {
+        email,
+        type: "forget-password",
+        otp,
+      },
+    });
+    return c.json({ success: true, message: "OTP verified successfully" }, 200);
+  } catch (error: any) {
+    return c.json(
+      {
+        success: false,
+        message: error?.body?.message,
+      },
+      error?.statusCode || 500,
+    );
+  }
+};
+
+export const resetPasswordHandler: RouteHandler<
+  typeof resetPasswordRoute
+> = async (c) => {
+  const { email, password, otp } = c.req.valid("json");
+  try {
+    await auth.api.resetPasswordEmailOTP({
+      body: {
+        email,
+        otp,
+        password,
+      },
+    });
+    return c.json(
+      { success: true, message: "Password reset successfully" },
+      201,
+    );
+  } catch (error: any) {
+    return c.json(
+      {
+        success: false,
+        message: error?.body?.message,
+      },
+      error?.statusCode || 500,
+    );
+  }
 };

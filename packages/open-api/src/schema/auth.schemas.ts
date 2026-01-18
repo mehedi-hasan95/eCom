@@ -72,3 +72,20 @@ export const verifyRegistrationEmailSchema = z.object({
     .string({ message: "Enter the verification OTP send your email" })
     .openapi({ example: "123456" }),
 });
+
+export const resetPasswordSchema = z
+  .object({
+    email: z.email(),
+    otp: z.string(),
+    password: z.string().min(6).max(64),
+    confirmPassword: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        path: ["confirmPassword"],
+        message: "Password do not match",
+        code: customError,
+      });
+    }
+  });

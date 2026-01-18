@@ -14,8 +14,14 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import Link from "next/link";
 import { Checkbox } from "@workspace/ui/components/checkbox";
+import { useMutation } from "@tanstack/react-query";
+import { loginAction } from "@/lib/actions/auth-action";
+import { useRouter } from "next/navigation";
+import { LoadingButton } from "@/components/common/loading-button";
+import { toast } from "sonner";
 
 export const SignInForm = () => {
+  const router = useRouter();
   const form = useForm<z.input<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -24,8 +30,18 @@ export const SignInForm = () => {
       rememberMe: true,
     },
   });
+  const loginMutation = useMutation({
+    mutationFn: loginAction,
+    onSuccess: () => {
+      toast.success("Success", { description: "Login successfully" });
+      router.push("/");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
   function onSubmit(data: z.input<typeof loginSchema>) {
-    console.log(data);
+    loginMutation.mutate(data);
   }
   return (
     <div className="space-y-4">
@@ -39,7 +55,7 @@ export const SignInForm = () => {
                 <FieldLabel htmlFor="login-form-email">Your Email</FieldLabel>
                 <Input
                   {...field}
-                  id="login-form-title"
+                  id="login-form-email"
                   aria-invalid={fieldState.invalid}
                   placeholder="you@domain.com"
                   autoComplete="off"
@@ -94,8 +110,8 @@ export const SignInForm = () => {
                 </Field>
               )}
             />
-            <Link href={"/forgot-password"}>
-              <Button variant={"link"}>Forgot Password?</Button>
+            <Link href={"/forget-password"}>
+              <Button variant={"link"}>Forget Password?</Button>
             </Link>
           </div>
         </FieldGroup>
@@ -104,9 +120,13 @@ export const SignInForm = () => {
         <Button type="button" variant="outline" onClick={() => form.reset()}>
           Reset
         </Button>
-        <Button type="submit" form="login-form">
-          Submit
-        </Button>
+        {loginMutation.isPending ? (
+          <LoadingButton />
+        ) : (
+          <Button type="submit" form="login-form">
+            Login
+          </Button>
+        )}
       </Field>
     </div>
   );
