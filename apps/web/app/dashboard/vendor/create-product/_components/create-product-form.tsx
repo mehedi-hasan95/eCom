@@ -19,16 +19,19 @@ import {
 } from "@workspace/ui/components/field";
 import { Button } from "@workspace/ui/components/button";
 import { ImageUploader } from "./image-uploader";
+import { Input } from "@workspace/ui/components/input";
+import { uploadAction } from "@/lib/actions/product-action";
 
 export const CreateProductForm = () => {
   const form = useForm<z.infer<typeof productCreateSchema>>({
     resolver: zodResolver(productCreateSchema),
     defaultValues: {
+      title: "",
       images: [],
     },
   });
-  function onSubmit(data: z.infer<typeof productCreateSchema>) {
-    console.log(data);
+  async function onSubmit(data: z.infer<typeof productCreateSchema>) {
+    await uploadAction(data);
   }
   return (
     <Card>
@@ -38,6 +41,27 @@ export const CreateProductForm = () => {
       <CardContent>
         <form id="creatd-product" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
+            <Controller
+              name="title"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="create-product-title">
+                    Product Image
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="create-product-title"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Login button not working on mobile"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
             <Controller
               name="images"
               control={form.control}

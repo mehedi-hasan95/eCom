@@ -14,8 +14,10 @@
     "@workspace/db": "workspace:*",
     "@workspace/open-api": "workspace:*",
     "@workspace/redis": "workspace:*",
+    "@workspace/uploadthing": "workspace:*",
     "dotenv": "^17.2.3",
     "hono": "^4.11.4",
+    "uploadthing": "^7.7.4",
     "zod": "^4.3.5"
   },
   "devDependencies": {

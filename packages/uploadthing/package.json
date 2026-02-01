@@ -1,0 +1,13 @@
+{
+  "name": "@workspace/uploadthing",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "uploadthing": "^7.7.4"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
