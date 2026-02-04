@@ -16,8 +16,6 @@ export const getCategoryHandler: RouteHandler<typeof getCategoryRoute> = async (
   const inCategory = await prisma.category.findUnique({
     where: { slug: category },
   });
-  if (!inCategory) {
-    return c.json({ success: false }, 404);
-  }
+
   return c.json({ success: true, category: inCategory }, 200);
 };

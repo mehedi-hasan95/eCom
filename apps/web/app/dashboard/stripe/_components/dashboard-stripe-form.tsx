@@ -49,6 +49,7 @@ export const DashboardStripeForm = () => {
       window.location.href = data.url;
     },
     onError: (error) => {
+      // todo:
       console.log(error);
     },
   });

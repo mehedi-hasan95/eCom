@@ -1,6 +1,6 @@
 "use client";
 import { getCategoriesAction } from "@/lib/actions/category/category-action";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { Card } from "@workspace/ui/components/card";
 import {
@@ -15,15 +15,45 @@ import { ArrowRight, Edit2, MoreHorizontal, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { CategoryPageLoading } from "./category-page-loading";
+import { deleteCategoryAction } from "@/lib/actions/admin/admin-action";
 
 export const CategoryPage = () => {
+  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategoriesAction,
   });
+
+  //Delete category
+  const deleteMutation = useMutation({
+    mutationFn: deleteCategoryAction,
+    onMutate: async (deleteCat) => {
+      await queryClient.cancelQueries({
+        queryKey: ["categories", deleteCat.slug],
+      });
+      const previousCat = queryClient.getQueryData([
+        "categories",
+        deleteCat.slug,
+      ]);
+      queryClient.setQueryData(["categories", deleteCat.slug], deleteCat);
+      return { previousCat, deleteCat };
+    },
+    onError: (err, deleteCat, onMutateResult) => {
+      queryClient.setQueryData(
+        ["categories", onMutateResult?.deleteCat.slug],
+        onMutateResult?.previousCat,
+      );
+    },
+    onSettled: (deleteCat) =>
+      queryClient.invalidateQueries({
+        queryKey: ["categories", deleteCat.slug],
+      }),
+  });
+
   if (isLoading) {
     return <CategoryPageLoading />;
   }
+
   return (
     <>
       <div className="flex justify-between items-center">
@@ -71,11 +101,20 @@ export const CategoryPage = () => {
                       align="end"
                       className="bg-card border-border"
                     >
-                      <DropdownMenuItem className="cursor-pointer hover:bg-muted">
-                        <Edit2 className="w-4 h-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer hover:bg-muted text-destructive">
+                      <Link
+                        href={`/dashboard/admin/categories/${category.slug}`}
+                      >
+                        <DropdownMenuItem className="cursor-pointer hover:bg-muted">
+                          <Edit2 className="w-4 h-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                      </Link>
+                      <DropdownMenuItem
+                        className="cursor-pointer hover:bg-muted text-destructive"
+                        onClick={() =>
+                          deleteMutation.mutate({ slug: category.slug })
+                        }
+                      >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete
                       </DropdownMenuItem>

@@ -18,7 +18,7 @@ export const openAPIConfiguration = (app: OpenAPIHono) => {
       pageTitle: "Ecom API",
       darkMode: true,
       defaultHttpClient: { clientKey: "fetch", targetKey: "js" },
-    })
+    }),
   );
 };
 
@@ -42,7 +42,7 @@ export const defaultHook = (result: any, c: Context) => {
         errors: formatZodErrors(result),
         source: "custom_error_handler",
       },
-      422
+      422,
     );
   }
 };
