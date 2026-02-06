@@ -88,12 +88,25 @@ model Verification {
 }
 
 model Category {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  image     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String          @id @default(uuid())
+  name          String
+  slug          String          @unique
+  image         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  subCategories SubCategories[]
+
+  @@index([slug])
+}
+
+model SubCategories {
+  id           String   @id @default(uuid())
+  name         String
+  slug         String   @unique
+  categorySlug String
+  category     Category @relation(fields: [categorySlug], references: [slug], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([slug])
 }

@@ -1,4 +1,7 @@
-import { getCategoriesAction } from "@/lib/actions/category/category-action";
+import {
+  getCategoriesAction,
+  getSubCategoriesAction,
+} from "@/lib/actions/category/category-action";
 import getQueryClient from "@/lib/query-client";
 
 interface Props {
@@ -9,6 +12,10 @@ const Page = async ({ children }: Props) => {
   await queryClient.prefetchQuery({
     queryKey: ["categories"],
     queryFn: getCategoriesAction,
+  });
+  await queryClient.prefetchQuery({
+    queryKey: ["subCategories"],
+    queryFn: getSubCategoriesAction,
   });
   return <>{children}</>;
 };

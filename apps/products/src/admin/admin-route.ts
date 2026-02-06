@@ -1,6 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { slugRegex } from "@workspace/open-api/schemas/regx";
 import { adminMiddleware } from "../middleware";
+import { subCategorySchema } from "@workspace/open-api/schemas/admin.schamas";
 
 const tags = ["Admin"];
 export const createCategoryRoute = createRoute({
@@ -92,6 +93,81 @@ export const deleteCategoryRoute = createRoute({
     body: {
       content: {
         "application/json": { schema: z.object({ slug: z.string() }) },
+      },
+    },
+  },
+  responses: {
+    201: { description: "OK" },
+    401: { description: "Unauthorize" },
+    500: { description: "Internal server error" },
+  },
+});
+
+export const createSubCategoryRoute = createRoute({
+  method: "post",
+  path: `/category/create-subcategory`,
+  tags,
+  summary: "Create Sub Category",
+  middleware: adminMiddleware,
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: subCategorySchema },
+      },
+    },
+  },
+  responses: {
+    201: { description: "OK" },
+    401: { description: "Unauthorize" },
+    500: { description: "Internal server error" },
+  },
+});
+
+export const deleteSubCategoryRoute = createRoute({
+  method: "delete",
+  path: `/category/delete-subcategory`,
+  tags,
+  summary: "Delete Sub Category",
+  middleware: adminMiddleware,
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.object({ slug: z.string() }) },
+      },
+    },
+  },
+  responses: {
+    201: { description: "OK" },
+    401: { description: "Unauthorize" },
+    500: { description: "Internal server error" },
+  },
+});
+
+export const updateSubCategoryRoute = createRoute({
+  method: "patch",
+  path: `/category/update-subcategory`,
+  tags,
+  summary: "Update Sub Category",
+  middleware: adminMiddleware,
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            id: z.string(),
+            name: z.string().min(1).max(50),
+            slug: z
+              .string()
+              .min(1)
+              .max(80)
+              .regex(slugRegex, "Invalid slug format"),
+            categorySlug: z
+              .string()
+              .min(1)
+              .max(80)
+              .regex(slugRegex, "Invalid slug format"),
+          }),
+        },
       },
     },
   },

@@ -7,6 +7,7 @@ interface Props {
 const Page = async ({ params }: Props) => {
   const { category } = await params;
   const data = await getCategoryAction(category);
+  console.log(data);
   return <CreateCategory initialData={data.category} />;
 };
 

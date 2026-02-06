@@ -20,3 +20,9 @@ export const categorySchema = z
     message: "Remove the previous image before uploading a new one",
     path: ["image"],
   });
+
+export const subCategorySchema = z.object({
+  name: z.string().min(1).max(50),
+  slug: z.string().min(1).max(80).regex(slugRegex, "Invalid slug format"),
+  categorySlug: z.string().min(1, { message: "Please select a category" }),
+});

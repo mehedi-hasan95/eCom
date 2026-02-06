@@ -7,6 +7,7 @@ import {
   IdCard,
   Landmark,
   LayoutDashboard,
+  List,
   PackagePlus,
   ShoppingBasket,
   UserCog,
@@ -32,6 +33,7 @@ const vendorMenus = [
 const adminMenus = [
   { name: "ADMIN", url: "/dashboard/admin", icon: UserCog },
   { name: "Category", url: "/dashboard/admin/categories", icon: Guitar },
+  { name: "Sub Category", url: "/dashboard/admin/sub-categories", icon: List },
 ];
 export const DashboardMainMenus = () => {
   const { user } = useGetSession();

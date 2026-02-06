@@ -1,6 +1,6 @@
 import { createRoute, z } from "@hono/zod-openapi";
 
-const tags = ["Everyone"];
+const tags = ["Categories"];
 export const getCategoriesRoute = createRoute({
   method: "get",
   path: "/",
@@ -14,11 +14,11 @@ export const getCategoriesRoute = createRoute({
 
 export const getCategoryRoute = createRoute({
   method: "get",
-  path: "/:category",
+  path: "/category",
   tags,
   summary: "Get a category",
   request: {
-    params: z.object({
+    query: z.object({
       category: z.string(),
     }),
   },
@@ -26,5 +26,31 @@ export const getCategoryRoute = createRoute({
     200: { description: "OK" },
     404: { description: "NOT FOUND" },
     500: { description: "NOT" },
+  },
+});
+
+// sub category
+export const getSubCategoriesRoute = createRoute({
+  method: "get",
+  path: "/categories/sub-categories",
+  summary: "Get Sub Categories",
+  tags,
+  responses: {
+    200: { description: "OK" },
+    500: { description: "Internal server error" },
+  },
+});
+
+export const getSubCategoryRoute = createRoute({
+  method: "get",
+  path: "/categories/sub-category",
+  summary: "Get a Sub Category",
+  tags,
+  request: {
+    query: z.object({ slug: z.string() }),
+  },
+  responses: {
+    200: { description: "OK" },
+    500: { description: "Internal server error" },
   },
 });
