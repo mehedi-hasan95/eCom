@@ -81,26 +81,70 @@ export const CreateCategory = ({ initialData }: Props) => {
 
   const createMutation = useMutation({
     mutationFn: createCategoryAction,
+    onMutate: async (newTodo) => {
+      await queryClient.cancelQueries({
+        queryKey: ["categories", newTodo.slug],
+      });
+      const previousTodo = queryClient.getQueryData([
+        "categories",
+        newTodo.slug,
+      ]);
+      queryClient.setQueryData(["categories", newTodo.slug], newTodo);
 
-    onError: (error) => {
-      toast.error(error.message);
+      return { previousTodo, newTodo };
     },
-    onSuccess: (data) => {
-      toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    onError: (err, newTodo, onMutateResult) => {
+      queryClient.setQueryData(
+        ["categories", onMutateResult?.newTodo.slug],
+        onMutateResult?.previousTodo,
+      );
+      toast.error("Can't create subcategory. Please try again!!");
+    },
+    onSettled: (newTodo) => {
+      queryClient.invalidateQueries({
+        queryKey: ["categories", newTodo?.slug],
+      });
+      toast.success("Category creted");
       router.push("/dashboard/admin/categories");
     },
+
+    // onError: (error) => {
+    //   toast.error(error.message);
+    // },
+    // onSuccess: (data) => {
+    //   toast.success(data.message);
+    //   queryClient.invalidateQueries({ queryKey: ["categories"] });
+    //   router.push("/dashboard/admin/categories");
+    // },
   });
 
   // update category
   const updateMutation = useMutation({
     mutationFn: updateCategoryAction,
-    onError: (error) => {
-      toast.error(error.message);
+    onMutate: async (newTodo) => {
+      await queryClient.cancelQueries({
+        queryKey: ["categories", newTodo.slug],
+      });
+      const previousTodo = queryClient.getQueryData([
+        "categories",
+        newTodo.slug,
+      ]);
+      queryClient.setQueryData(["categories", newTodo.slug], newTodo);
+
+      return { previousTodo, newTodo };
     },
-    onSuccess: (data) => {
-      toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    onError: (err, newTodo, onMutateResult) => {
+      queryClient.setQueryData(
+        ["categories", onMutateResult?.newTodo.slug],
+        onMutateResult?.previousTodo,
+      );
+      toast.error("Can't create subcategory. Please try again!!");
+    },
+    onSettled: (newTodo) => {
+      queryClient.invalidateQueries({
+        queryKey: ["categories", newTodo?.slug],
+      });
+      toast.success("Category Updated");
       router.push("/dashboard/admin/categories");
     },
   });

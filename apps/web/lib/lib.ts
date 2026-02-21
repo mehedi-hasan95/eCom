@@ -1,6 +1,6 @@
 import { differenceInDays } from "date-fns";
 
-export const isNewProduct = (createdAt: Date, days: number = 7) => {
+export const dayDistance = (createdAt: Date, days: number = 7) => {
   return differenceInDays(new Date(), new Date(createdAt)) <= days;
 };
 

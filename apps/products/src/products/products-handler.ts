@@ -86,7 +86,7 @@ export const updateProductHandler: RouteHandler<
   }
   const allImage = [...(imageUrl ?? []), ...(data.previousImage ?? [])];
   try {
-    const updateData = await prisma.products.update({
+    await prisma.products.update({
       where: { id: data.id },
       data: {
         basePrice: data.basePrice,

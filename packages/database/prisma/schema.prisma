@@ -35,6 +35,7 @@ model User {
   stripeCustomerId String?
   stripeVerified   Boolean    @default(false)
   products         Products[]
+  wishLists        WishList[]
 
   @@unique([email])
   @@map("user")
@@ -151,8 +152,22 @@ model Products {
   userEmail        String
   user             User          @relation(fields: [userEmail], references: [email], onDelete: Cascade)
 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  wishLists WishList[]
+
+  @@index([id])
+}
+
+model WishList {
+  id        String   @id @default(cuid())
+  productId String
+  userEmail String
+  products  Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userEmail], references: [email], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([id])
+  @@unique([productId, userEmail])
+  @@index([id, userEmail])
 }

@@ -461,7 +461,7 @@ export const CreateProductForm = ({ initialData }: Props) => {
           <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
-          {createMutation.isPending ? (
+          {createMutation.isPending || updateMutation.isPending ? (
             <LoadingButton />
           ) : (
             <Button type="submit" form="creatd-product">

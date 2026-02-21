@@ -6,7 +6,6 @@ import {
   updateSubCategoryAction,
 } from "@/lib/actions/admin/admin-action";
 import { getCategoriesAction } from "@/lib/actions/category/category-action";
-import getQueryClient from "@/lib/query-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SubCategories } from "@workspace/db";
@@ -46,8 +45,7 @@ export const SubCategoryForm = ({ initialData }: Props) => {
   const btnLabel = initialData ? "Update" : "Create";
   const [isSlugEdited, setIsSlugEdited] = useState(false);
   const prevTitleRef = useRef("");
-  const queryClient = getQueryClient();
-  const usequeryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const router = useRouter();
   const form = useForm<z.infer<typeof subCategorySchema>>({
     resolver: zodResolver(subCategorySchema),
@@ -82,47 +80,30 @@ export const SubCategoryForm = ({ initialData }: Props) => {
   //create a category
   const createMutation = useMutation({
     mutationFn: createSubCategoryAction,
-    // onError: (error) => {
-    //   console.log(error);
-    // },
-    // onSuccess: (data) => {
-    //   console.log(data);
-    // },
-
-    onMutate: async (variables) => {
-      await queryClient.cancelQueries({ queryKey: ["subCategories"] });
-
-      const previousSubCategories = queryClient.getQueryData<SubCategories[]>([
+    onMutate: async (newTodo) => {
+      await queryClient.cancelQueries({
+        queryKey: ["subCategories", newTodo.slug],
+      });
+      const previousTodo = queryClient.getQueryData([
         "subCategories",
+        newTodo.slug,
       ]);
+      queryClient.setQueryData(["subCategories", newTodo.slug], newTodo);
 
-      const optimisticSubCategory: SubCategories = {
-        id: crypto.randomUUID(), // temp ID
-        name: variables.name,
-        slug: `temp-${crypto.randomUUID()}`, // MUST be unique
-        categorySlug: variables.categorySlug,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      queryClient.setQueryData<SubCategories[]>(
-        ["subCategories"],
-        (old = []) => [...old, optimisticSubCategory],
-      );
-
-      return { previousSubCategories };
+      return { previousTodo, newTodo };
     },
-
-    onError: (error, variables, context) => {
-      console.log(error);
+    onError: (err, newTodo, onMutateResult) => {
       queryClient.setQueryData(
-        ["subCategories"],
-        context?.previousSubCategories,
+        ["subCategories", onMutateResult?.newTodo.slug],
+        onMutateResult?.previousTodo,
       );
+      toast.error("Can't create subcategory. Please try again!!");
     },
-
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["subCategories"] });
+    onSettled: (newTodo) => {
+      queryClient.invalidateQueries({
+        queryKey: ["subCategories", newTodo?.slug],
+      });
+      toast.success("Sub Category creted");
       router.push("/dashboard/admin/sub-categories");
     },
   });
@@ -131,32 +112,30 @@ export const SubCategoryForm = ({ initialData }: Props) => {
   const updateMutation = useMutation({
     mutationFn: updateSubCategoryAction,
     onMutate: async (newTodo) => {
-      await usequeryClient.cancelQueries({
-        queryKey: ["subCategories", newTodo.id],
+      await queryClient.cancelQueries({
+        queryKey: ["subCategories", newTodo.slug],
       });
-      const previousTodo = usequeryClient.getQueryData([
+      const previousTodo = queryClient.getQueryData([
         "subCategories",
-        newTodo.id,
+        newTodo.slug,
       ]);
-      usequeryClient.setQueryData(["subCategories", newTodo.id], newTodo);
+      queryClient.setQueryData(["subCategories", newTodo.slug], newTodo);
 
       return { previousTodo, newTodo };
     },
     onError: (err, newTodo, onMutateResult) => {
-      usequeryClient.setQueryData(
+      queryClient.setQueryData(
         ["subCategories", onMutateResult?.newTodo.slug],
         onMutateResult?.previousTodo,
       );
+      toast.error("Can't create subcategory. Please try again!!");
     },
-    onSettled: (newTodo, error) => {
-      if (!error?.message) {
-        usequeryClient.invalidateQueries({
-          queryKey: ["subCategories", newTodo?.slug],
-        });
-        router.push("/dashboard/admin/sub-categories");
-      } else {
-        toast.error(error?.message);
-      }
+    onSettled: (newTodo) => {
+      queryClient.invalidateQueries({
+        queryKey: ["subCategories", newTodo?.slug],
+      });
+      toast.success("Sub Category creted");
+      router.push("/dashboard/admin/sub-categories");
     },
   });
 

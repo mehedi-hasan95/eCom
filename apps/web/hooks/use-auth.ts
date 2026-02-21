@@ -11,6 +11,7 @@ export const useLogout = () => {
     onSuccess: () => {
       toast.success("Success", { description: "Logout Successfully" });
       queryClient.removeQueries({ queryKey: ["sessions"] });
+      queryClient.removeQueries({ queryKey: ["wishlist"] });
       router.refresh();
     },
     onError: () => {

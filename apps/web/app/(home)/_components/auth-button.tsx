@@ -4,7 +4,7 @@ import { Author } from "./author";
 import { useQuery } from "@tanstack/react-query";
 import { sessionAction } from "@/lib/actions/auth-server-action";
 
-export const Navigation = () => {
+export const AuthButton = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["sessions"],
     queryFn: sessionAction,

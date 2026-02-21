@@ -9,6 +9,7 @@ import { HTTPException } from "hono/http-exception";
 import products from "./products/products-index";
 import admin from "./admin/admin-index";
 import categories from "./categories/categories-index";
+import wishlist from "./wishlist/wishlist-index";
 
 const app = new OpenAPIHono({
   defaultHook,
@@ -25,7 +26,8 @@ app.use(
 const routes = app
   .route("/products", products)
   .route("/admin", admin)
-  .route("/categories", categories);
+  .route("/categories", categories)
+  .route("/wishlist", wishlist);
 
 app.onError((err, c) => {
   if (err instanceof HTTPException) {

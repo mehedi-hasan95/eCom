@@ -1,11 +1,9 @@
-import { Footer } from "./_components/footer";
-import { NavMenu } from "./_components/nav-menu";
+import { HomeProducts } from "./_components/home-products";
 
 export default function Page() {
   return (
-    <div className="flex flex-col justify-between min-h-screen">
-      <NavMenu />
-      <Footer />
+    <div className="">
+      <HomeProducts />
     </div>
   );
 }

@@ -65,7 +65,7 @@ export const CategoryPage = () => {
             <EditDeleteCard
               key={category.id}
               href={`/dashboard/admin/categories/${category.slug}`}
-              image={category.image || ""}
+              image={category.image || "/placeholder.png"}
               onDelete={() => deleteMutation.mutate({ slug: category.slug })}
               title={category.name}
               updateAt={formatDistanceToNow(category.updatedAt, {
