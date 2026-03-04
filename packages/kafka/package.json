@@ -1,0 +1,15 @@
+{
+  "name": "@workspace/kafka",
+  "version": "0.0.1",
+  "main": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "kafkajs": "^2.2.4"
+  },
+  "devDependencies": {
+    "@workspace/typescript-config": "workspace:*"
+  }
+}

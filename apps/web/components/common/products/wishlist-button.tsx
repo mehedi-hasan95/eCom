@@ -17,13 +17,21 @@ export const WishlistButton = ({ productId, isWishlisted }: Props) => {
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: createWishlistAction,
-    onMutate: async (newWishlist) => {
+    onMutate: async (productId: string) => {
       await queryClient.cancelQueries({ queryKey: ["wishlist"] });
-      const previousWishlist = queryClient.getQueryData(["wishlist"]);
-      queryClient.setQueryData(["wishlist"], (old: WishList[]) => [
-        ...old,
-        newWishlist,
+
+      const previousWishlist = queryClient.getQueryData<WishList[]>([
+        "wishlist",
       ]);
+
+      queryClient.setQueryData<WishList[]>(["wishlist"], (old = []) => [
+        ...old,
+        {
+          id: "temp-id", // temporary id
+          productId,
+        } as WishList,
+      ]);
+
       return { previousWishlist };
     },
 
