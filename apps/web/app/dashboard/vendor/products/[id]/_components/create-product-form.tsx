@@ -28,7 +28,7 @@ import {
   getSubCategoriesAction,
 } from "@/lib/actions/category/category-action";
 import { ModifyCombobox } from "@/components/common/modify/modify-combobox";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ColorSelector } from "./color-selector";
 import {
   InputGroup,
@@ -45,6 +45,7 @@ import { SwitchController } from "@/components/common/form/switch-contoller";
 import { SelectController } from "@/components/common/form/select-controller";
 import { SizeSelector } from "./size-selector";
 import {
+  getSingleProductAction,
   productCreateAction,
   productUpdateAction,
 } from "@/lib/actions/product-action";
@@ -52,17 +53,20 @@ import { LoadingButton } from "@/components/common/loading-button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useGetSession } from "@/hooks/use-auth";
-import { Products } from "@workspace/db";
 import Image from "next/image";
 
 interface Props {
-  initialData: Products | null;
+  id: string;
 }
-export const CreateProductForm = ({ initialData }: Props) => {
+export const CreateProductForm = ({ id }: Props) => {
   const router = useRouter();
   const { user } = useGetSession();
   const deliveryType = ["physical", "digital", "service"];
   const productStatus = ["draft", "active", "archived"];
+  const { data: initialData } = useQuery({
+    queryKey: ["products", id],
+    queryFn: () => getSingleProductAction(id),
+  });
   const { data } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategoriesAction,
@@ -76,26 +80,29 @@ export const CreateProductForm = ({ initialData }: Props) => {
     resolver: zodResolver(productCreateSchema),
     mode: "onChange",
     defaultValues: {
-      title: initialData?.title || "",
+      title: initialData?.product?.title || "",
       images: [],
-      previousImage: initialData?.images || undefined,
-      categorySlug: initialData?.categorySlug || "",
-      subCategorySlug: initialData?.subCategorySlug || "",
-      shortDescription: initialData?.shortDescription || "",
-      basePrice: initialData?.basePrice || undefined,
-      salePrice: initialData?.salePrice || undefined,
-      stock: initialData?.stock || undefined,
-      weight: initialData?.weight || undefined,
-      tags: initialData?.tags || [],
-      color: initialData?.color || [],
+      previousImage: initialData?.product?.images || undefined,
+      categorySlug: initialData?.product?.categorySlug || "",
+      subCategorySlug: initialData?.product?.subCategorySlug || "",
+      shortDescription: initialData?.product?.shortDescription || "",
+      basePrice: initialData?.product?.basePrice || undefined,
+      salePrice: initialData?.product?.salePrice || undefined,
+      stock: initialData?.product?.stock || undefined,
+      weight: initialData?.product?.weight || undefined,
+      tags: initialData?.product?.tags || [],
+      color: initialData?.product?.color || [],
       specification:
-        (initialData?.specification as { key: string; value: string }[]) ?? [],
-      description: initialData?.description || "",
-      cashOnDelevary: initialData?.cashOnDelevary || false,
-      cupon: initialData?.cupon || "",
-      type: initialData?.type || "physical",
-      status: initialData?.status || "draft",
-      sizes: initialData?.sizes || [],
+        (initialData?.product?.specification as {
+          key: string;
+          value: string;
+        }[]) ?? [],
+      description: initialData?.product?.description || "",
+      cashOnDelevary: initialData?.product?.cashOnDelevary || false,
+      cupon: initialData?.product?.cupon || "",
+      type: initialData?.product?.type || "physical",
+      status: initialData?.product?.status || "draft",
+      sizes: initialData?.product?.sizes || [],
     },
   });
   const selectedCat = form.watch("categorySlug");
@@ -104,8 +111,14 @@ export const CreateProductForm = ({ initialData }: Props) => {
     const updated = prevImage?.filter((_, i) => i !== index);
     form.setValue("previousImage", updated, { shouldValidate: true });
   };
+
+  const prevCategory = useRef(selectedCat);
+
   useEffect(() => {
-    form.setValue("subCategorySlug", "");
+    if (prevCategory.current && prevCategory.current !== selectedCat) {
+      form.setValue("subCategorySlug", "");
+    }
+    prevCategory.current = selectedCat;
   }, [selectedCat, form]);
   const { data: subCatData } = useQuery({
     queryKey: ["subCategories", selectedCat],
@@ -149,8 +162,8 @@ export const CreateProductForm = ({ initialData }: Props) => {
   async function onSubmit(data: z.input<typeof productCreateSchema>) {
     if (initialData) {
       updateMutation.mutate({
-        id: initialData.id,
-        sellerEmail: initialData?.userEmail,
+        id: initialData.product?.id,
+        sellerEmail: initialData?.product?.userEmail,
         ...data,
       });
     } else {
@@ -178,7 +191,7 @@ export const CreateProductForm = ({ initialData }: Props) => {
                 placeholder="Slim handmade wallet crafted from genuine leather"
                 title=" Write a short description"
               />
-              {initialData?.images.length && (
+              {initialData?.product?.images.length && (
                 <Controller
                   name="previousImage"
                   control={form.control}

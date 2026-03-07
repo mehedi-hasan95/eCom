@@ -8,6 +8,7 @@ import {
 } from "./products-route";
 import { utapi } from "@workspace/uploadthing";
 import { Prisma, prisma } from "@workspace/db";
+import { producer } from "../utils/kafka";
 
 export const createProductHandler: RouteHandler<
   typeof createProductRoute
@@ -44,22 +45,33 @@ export const getSingleProductHandler: RouteHandler<
   typeof getSingleProductRoute
 > = async (c) => {
   const { id } = c.req.valid("query");
-  const data = await prisma.products.findUnique({
-    where: { id },
-    include: {
-      user: {
-        select: {
-          email: true,
-          name: true,
-          image: true,
-          id: true,
-          stripeCustomerId: true,
-        },
-      },
-    },
-  });
 
-  return c.json({ product: data }, 200);
+  const [product, ratingStats] = await Promise.all([
+    await prisma.products.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            email: true,
+            name: true,
+            image: true,
+            id: true,
+            stripeCustomerId: true,
+          },
+        },
+        productAnalyses: { select: { productSale: true } },
+      },
+    }),
+    prisma.ratings.aggregate({
+      where: { productId: id },
+      _avg: { ratings: true },
+      _count: { _all: true },
+    }),
+  ]);
+  producer.send("product.activity", {
+    value: JSON.stringify({ id, action: "view-product" }),
+  });
+  return c.json({ product, rating: ratingStats }, 200);
 };
 
 /**

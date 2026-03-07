@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart, Truck, Shield, RotateCcw, Star } from "lucide-react";
+import { ShoppingCart, Truck, Shield, RotateCcw } from "lucide-react";
 import { ProductGallery } from "./product-gallery";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
@@ -15,35 +15,8 @@ import { WishlistButton } from "@/components/common/products/wishlist-button";
 import { useWishlistData } from "@/hooks/use-wishlist";
 import { HtmlParser } from "@/components/common/html-parser";
 import { fromatPrice } from "@/lib/lib";
-
-const mockProduct = {
-  id: "1",
-  title: "Premium Wireless Headphones Pro",
-  shortDescription:
-    "Professional-grade wireless headphones with active noise cancellation",
-  basePrice: 199.99,
-  salePrice: 149.99,
-  stock: 47,
-  tags: ["audio", "wireless", "noise-cancelling", "professional"],
-  weight: 0.25,
-  images: [
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1000&q=80",
-    "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=1000&q=80",
-    "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=1000&q=80",
-    "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=1000&q=80",
-  ],
-  color: ["Black", "Silver", "Navy Blue"],
-  sizes: [],
-
-  cashOnDelivery: true,
-  cupon: "WELCOME20",
-  status: "active",
-  categorySlug: "electronics",
-  subCategorySlug: "audio",
-  userEmail: "seller@example.com",
-  rating: 4.7,
-  reviewCount: 328,
-};
+import { Separator } from "@workspace/ui/components/separator";
+import { StarRating } from "@/components/common/products/star-rating";
 
 interface Props {
   id: string;
@@ -53,8 +26,10 @@ export const SingleProductPage = ({ id }: Props) => {
     queryKey: ["products", id],
     queryFn: () => getSingleProductAction(id),
     staleTime: 5000 * 60 * 5,
+    refetchOnMount: false,
   });
-  const [selectedColor, setSelectedColor] = useState(data?.color[0]);
+  const [selectedColor, setSelectedColor] = useState(data?.product?.color[0]);
+  const [selectedSize, setSelectedSize] = useState(data?.product?.sizes[0]);
   const [quantity, setQuantity] = useState(1);
 
   const { data: wishlistData } = useWishlistData();
@@ -70,25 +45,9 @@ export const SingleProductPage = ({ id }: Props) => {
   if (!data) {
     return <NotFound />;
   }
-  const basePrice = data?.basePrice ? data.basePrice : 0;
-  const salePrice = data?.salePrice ? data?.salePrice : 0;
+  const basePrice = data?.product?.basePrice ? data?.product?.basePrice : 0;
+  const salePrice = data?.product?.salePrice ? data?.product?.salePrice : 0;
   const discount = Math.round(((basePrice - salePrice) / basePrice) * 100);
-
-  const handleAddToCart = () => {
-    console.log("[v0] Added to cart:", {
-      product: mockProduct.title,
-      quantity,
-      color: selectedColor,
-    });
-  };
-
-  const handleBuyNow = () => {
-    console.log("[v0] Buy now:", {
-      product: mockProduct.title,
-      quantity,
-      color: selectedColor,
-    });
-  };
 
   /**
    * ============================================================
@@ -100,12 +59,12 @@ export const SingleProductPage = ({ id }: Props) => {
   // console.log(data.specification);
 
   const result = Object.fromEntries(
-    (data.specification as { key: string; value: string }[]).map((i) => [
-      i.key,
-      i.value,
-    ]),
+    (data.product.specification as { key: string; value: string }[]).map(
+      (i) => [i.key, i.value],
+    ),
   );
 
+  const productSale = data.product.productAnalyses[0]?.productSale ?? 0;
   return (
     <main className="min-h-screen bg-background">
       {/* Product Section */}
@@ -114,7 +73,40 @@ export const SingleProductPage = ({ id }: Props) => {
 
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Gallery */}
-          <ProductGallery images={data.images} />
+          <div className="space-y-5">
+            <ProductGallery images={data.product.images} />
+            <Separator />
+            <div className="space-y-3">
+              {data?.product.weight && (
+                <p>
+                  <strong>Weight:</strong>{" "}
+                  <span className="font-normal text-muted-foreground">
+                    {data?.product.weight} KG
+                  </span>
+                </p>
+              )}
+              {data.product.tags && (
+                <div className="flex gap-3 items-center">
+                  <strong>Tags:</strong>
+                  {data.product.tags.map((tag) => (
+                    <Button
+                      key={tag}
+                      variant={"ghost"}
+                      className="border-dashed border border-primary cursor-default"
+                    >
+                      {tag}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              {data.product.type && (
+                <div className="flex gap-3 items-center">
+                  <strong>Product Type:</strong>
+                  {data.product.type}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Details */}
           <div className="space-y-6">
@@ -123,10 +115,10 @@ export const SingleProductPage = ({ id }: Props) => {
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
                   <h1 className="text-3xl font-bold text-foreground leading-tight">
-                    {data.title}
+                    {data.product.title}
                   </h1>
                   <p className="mt-2 text-lg text-muted-foreground">
-                    {data.shortDescription}
+                    {data.product.shortDescription}
                   </p>
                 </div>
                 <WishlistButton
@@ -140,17 +132,10 @@ export const SingleProductPage = ({ id }: Props) => {
 
               {/* Rating */}
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${i < Math.floor(mockProduct.rating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm font-medium text-foreground">
-                  {mockProduct.rating} ({mockProduct.reviewCount} reviews)
-                </span>
+                <StarRating
+                  rating={data.rating._avg.ratings || 0}
+                  totalRatings={data.rating._count._all}
+                />
               </div>
             </div>
 
@@ -174,11 +159,11 @@ export const SingleProductPage = ({ id }: Props) => {
 
             {/* Stock Status */}
             <div>
-              {mockProduct.stock > 0 ? (
+              {data.product.stock - productSale > 0 ? (
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-green-500"></div>
                   <span className="text-sm font-medium text-foreground">
-                    In Stock ({mockProduct.stock} available)
+                    In Stock ({data.product.stock} available)
                   </span>
                 </div>
               ) : (
@@ -192,7 +177,7 @@ export const SingleProductPage = ({ id }: Props) => {
             </div>
 
             {/* Color Selection */}
-            {data?.color?.length >= 1 && (
+            {data?.product.color?.length >= 1 && (
               <div className="space-y-3">
                 <label className="block text-sm font-semibold text-foreground">
                   Color:{" "}
@@ -201,7 +186,7 @@ export const SingleProductPage = ({ id }: Props) => {
                   </span>
                 </label>
                 <div className="flex gap-3">
-                  {data?.color?.map((color) => (
+                  {data?.product.color?.map((color) => (
                     <button
                       key={color}
                       style={{ color: color }}
@@ -213,6 +198,34 @@ export const SingleProductPage = ({ id }: Props) => {
                       }`}
                     >
                       {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* size  */}
+            {data?.product.sizes?.length >= 1 && (
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-foreground">
+                  Size:{" "}
+                  <span className="font-normal text-muted-foreground">
+                    {selectedSize}
+                  </span>
+                </label>
+                <div className="flex gap-3">
+                  {data?.product.sizes?.map((size) => (
+                    <button
+                      key={size}
+                      // style={{ color: color }}
+                      onClick={() => setSelectedSize(size)}
+                      className={`px-4 py-2 rounded-lg border-2 font-medium transition cursor-pointer ${
+                        selectedSize === size
+                          ? "border-primary bg-primary/20"
+                          : "border-border text-foreground hover:border-primary"
+                      }`}
+                    >
+                      {size}
                     </button>
                   ))}
                 </div>
@@ -236,7 +249,7 @@ export const SingleProductPage = ({ id }: Props) => {
                 </span>
                 <button
                   onClick={() =>
-                    setQuantity(Math.min(mockProduct.stock, quantity + 1))
+                    setQuantity(Math.min(data.product.stock, quantity + 1))
                   }
                   className="h-10 w-10 rounded-lg border border-border hover:bg-muted transition flex items-center justify-center"
                 >
@@ -248,7 +261,7 @@ export const SingleProductPage = ({ id }: Props) => {
             {/* Action Buttons */}
             <div className="flex gap-3">
               <Button
-                onClick={handleAddToCart}
+                // onClick={handleAddToCart}
                 variant="outline"
                 className="flex-1 h-12 text-base"
               >
@@ -256,7 +269,7 @@ export const SingleProductPage = ({ id }: Props) => {
                 Add to Cart
               </Button>
               <Button
-                onClick={handleBuyNow}
+                // onClick={handleBuyNow}
                 className="flex-1 h-12 text-base bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 Buy Now
@@ -264,11 +277,11 @@ export const SingleProductPage = ({ id }: Props) => {
             </div>
 
             {/* Coupon Code */}
-            {data?.cupon && (
+            {data?.product.cupon && (
               <div className="rounded-lg bg-muted p-4">
                 <p className="text-sm text-muted-foreground">Use code</p>
                 <p className="text-lg font-bold text-foreground">
-                  {data?.cupon}
+                  {data?.product.cupon}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   for additional discount
@@ -298,7 +311,7 @@ export const SingleProductPage = ({ id }: Props) => {
                   </p>
                 </div>
               </div>
-              {data.cashOnDelevary && (
+              {data.product.cashOnDelevary && (
                 <div className="flex items-start gap-3">
                   <RotateCcw className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                   <div>
@@ -325,15 +338,15 @@ export const SingleProductPage = ({ id }: Props) => {
           </h2>
           <div className="container-default">
             {/* {mockProduct.description} */}
-            <HtmlParser html={data.description} />
+            <HtmlParser html={data.product.description} />
           </div>
         </section>
 
         {/* Reviews */}
-        <ReviewsSection productId={mockProduct.id} />
+        <ReviewsSection productId={data.product.id} />
 
         {/* Related Products */}
-        <RelatedProducts currentProductId={mockProduct.id} />
+        <RelatedProducts currentProductId={data.product.id} />
       </div>
     </main>
   );
