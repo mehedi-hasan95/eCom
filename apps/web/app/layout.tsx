@@ -7,6 +7,7 @@ import { sessionAction } from "@/lib/actions/auth-server-action";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getAllProductsAction } from "@/lib/actions/product-action";
 import { getWishlistAction } from "@/lib/actions/wishlist-action";
+import { Metadata } from "next";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -49,4 +50,20 @@ export default async function RootLayout({
       </body>
     </html>
   );
+}
+
+/**
+ * ============================================================
+ * 📌 Metadata
+ * ============================================================
+ */
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: {
+      default: "MultiMart",
+      template: "%s | MultiMart",
+    },
+    description: "A multivendor Ecommerce website",
+  };
 }

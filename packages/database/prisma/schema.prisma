@@ -36,6 +36,7 @@ model User {
   stripeVerified   Boolean    @default(false)
   products         Products[]
   wishLists        WishList[]
+  ratings          Ratings[]
 
   @@unique([email])
   @@map("user")
@@ -152,9 +153,11 @@ model Products {
   userEmail        String
   user             User          @relation(fields: [userEmail], references: [email], onDelete: Cascade)
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  wishLists WishList[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  wishLists       WishList[]
+  ratings         Ratings?
+  productAnalyses ProductAnalysis[]
 
   @@index([id])
 }
@@ -170,4 +173,32 @@ model WishList {
 
   @@unique([productId, userEmail])
   @@index([id, userEmail])
+}
+
+model Ratings {
+  id        String   @id @default(uuid())
+  ratings   Int?
+  reviews   String?
+  productId String
+  product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userEmail String
+  user      User     @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId])
+}
+
+model ProductAnalysis {
+  id           String   @id @default(uuid())
+  productViews Int      @default(0)
+  productSale  Int      @default(0)
+  addCart      Int      @default(0)
+  addWishlist  Int      @default(0)
+  productId    String
+  product      Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([productId])
 }

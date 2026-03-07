@@ -1,4 +1,4 @@
-import { Products } from "@workspace/db";
+import { Products, User } from "@workspace/db";
 import {
   deleteProductSchema,
   productCreateSchema,
@@ -80,8 +80,20 @@ export const getSingleProductAction = async (id: string) => {
     const error = await response.json();
     throw error;
   }
-  const data: { product: Products } = await response.json();
-  return data.product;
+  const data: {
+    product: Products & {
+      user: {
+        id: string;
+        name: string;
+        email: string;
+        image: string | null;
+        stripeCustomerId: string;
+      };
+      productAnalyses: { productSale: number }[];
+    };
+    rating: { _avg: { ratings: number | null }; _count: { _all: number } };
+  } = await response.json();
+  return data;
 };
 //update product
 
