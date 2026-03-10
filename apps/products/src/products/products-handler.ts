@@ -2,6 +2,7 @@ import { RouteHandler } from "@hono/zod-openapi";
 import {
   createProductRoute,
   deleteProductRoute,
+  getAllProductsRoute,
   getProductsRoute,
   getSingleProductRoute,
   updateProductRoute,
@@ -153,4 +154,15 @@ export const deleteProductHandler: RouteHandler<
     }
   }
   return c.json({ message: "Product delete successfully" }, 201);
+};
+
+export const getAllProductsHandler: RouteHandler<
+  typeof getAllProductsRoute
+> = async (c) => {
+  const { cats, maxPrice, sort } = c.req.valid("query");
+  console.log("cats: ", maxPrice);
+  const getCats = cats?.split(",");
+  console.log("getCats", getCats);
+  console.log("sort:", sort);
+  return c.json({ getCats, maxPrice, sort });
 };

@@ -3,6 +3,7 @@ import { defaultHook } from "@workspace/open-api/lib/open-api-configuration";
 import {
   createProductRoute,
   deleteProductRoute,
+  getAllProductsRoute,
   getProductsRoute,
   getSingleProductRoute,
   updateProductRoute,
@@ -10,6 +11,7 @@ import {
 import {
   createProductHandler,
   deleteProductHandler,
+  getAllProductsHandler,
   getProductsHandler,
   getSingleProductHandler,
   updateProductHandler,
@@ -24,6 +26,7 @@ app
   .openapi(getProductsRoute, getProductsHandler)
   .openapi(getSingleProductRoute, getSingleProductHandler)
   .openapi(updateProductRoute, updateProductHandler)
-  .openapi(deleteProductRoute, deleteProductHandler);
+  .openapi(deleteProductRoute, deleteProductHandler)
+  .openapi(getAllProductsRoute, getAllProductsHandler);
 
 export default app;

@@ -1,4 +1,5 @@
-import { Products, User } from "@workspace/db";
+import { Products } from "@workspace/db";
+import { sortValueType } from "@workspace/open-api/lib/constants";
 import {
   deleteProductSchema,
   productCreateSchema,
@@ -155,4 +156,37 @@ export const deleteProductAction = async (
     throw error;
   }
   return response.json();
+};
+
+type GetProductsParams = {
+  cats?: string[];
+  sort?: sortValueType;
+  maxPrice?: number;
+};
+
+export const getAllProducts = async (params: GetProductsParams) => {
+  const searchParams = new URLSearchParams();
+
+  if (params.cats?.length) {
+    searchParams.set("cats", params.cats.join(","));
+  }
+
+  if (params.sort) {
+    searchParams.set("sort", params.sort);
+  }
+
+  if (params.maxPrice) {
+    searchParams.set("maxPrice", params.maxPrice.toString());
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/products/all-product?${searchParams.toString()}`,
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  const data = await response.json();
+  return data;
 };

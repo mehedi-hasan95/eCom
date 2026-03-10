@@ -2,11 +2,19 @@ import { Logo } from "@/components/common/logo";
 import { Footer } from "../(home)/_components/footer";
 import { AuthButton } from "../(home)/_components/auth-button";
 import { WishlistCount } from "@/components/common/products/wishlist-count";
+import getQueryClient from "@/lib/query-client";
+import { getCategoriesAction } from "@/lib/actions/category/category-action";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 interface Props {
   children: React.ReactNode;
 }
 const Page = async ({ children }: Props) => {
+  const queryClient = getQueryClient();
+  await queryClient.prefetchQuery({
+    queryKey: ["categories"],
+    queryFn: getCategoriesAction,
+  });
   return (
     <div className="flex flex-col justify-between min-h-screen">
       <div className="flex-1 space-y-3">
@@ -21,7 +29,9 @@ const Page = async ({ children }: Props) => {
             </div>
           </div>
         </header>
-        {children}
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          {children}
+        </HydrationBoundary>
       </div>
       <Footer />
     </div>

@@ -5,6 +5,7 @@ import {
   productSchemasForserver,
   updateProductSchemasForserver,
 } from "@workspace/open-api/schemas/product.schemas";
+import { sortValues } from "@workspace/open-api/lib/constants";
 
 const tags = ["Products"];
 
@@ -111,6 +112,31 @@ export const deleteProductRoute = createRoute({
   },
   responses: {
     201: { description: "Deleted" },
+    404: { description: "Not found" },
+  },
+});
+
+/**
+ * ============================================================
+ * 📌 API: Get all product
+ * ============================================================
+ */
+
+export const getAllProductsRoute = createRoute({
+  method: "get",
+  path: "/all-product",
+  tags,
+  request: {
+    query: z.object({
+      sort: z.enum(sortValues).optional(),
+      cats: z.string().optional(),
+      maxPrice: z.coerce.number().optional(),
+    }),
+  },
+  responses: {
+    200: {
+      description: "All products",
+    },
     404: { description: "Not found" },
   },
 });

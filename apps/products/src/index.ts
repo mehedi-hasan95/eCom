@@ -10,8 +10,6 @@ import products from "./products/products-index";
 import admin from "./admin/admin-index";
 import categories from "./categories/categories-index";
 import wishlist from "./wishlist/wishlist-index";
-import { consumer, producer } from "./utils/kafka";
-import { runKafkaSubscriptions } from "./utils/subscriptions";
 
 const app = new OpenAPIHono({
   defaultHook,
@@ -52,46 +50,47 @@ app.onError((err, c) => {
  * 📌 Function: If I didn't use kafka
  * ============================================================
  */
-// serve(
-//   {
-//     fetch: app.fetch,
-//     port: 6002,
-//   },
-//   (info) => {
-//     console.log(`Server is running on http://localhost:${info.port}`);
-//     console.log(
-//       `You can get the documentation at http://localhost:${info.port}/api/v1/scalar`,
-//     );
-//   },
-// );
+serve(
+  {
+    fetch: app.fetch,
+    port: 6002,
+  },
+  (info) => {
+    console.log(`Server is running on http://localhost:${info.port}`);
+    console.log(
+      `You can get the documentation at http://localhost:${info.port}/api/v1/scalar`,
+    );
+  },
+);
 
 /**
  * ============================================================
  * 📌 Used Kafka
  * ============================================================
  */
-const start = async () => {
-  try {
-    Promise.all([await producer.connect(), await consumer.connect()]);
-    await runKafkaSubscriptions();
-    serve(
-      {
-        fetch: app.fetch,
-        port: 6002,
-      },
-      (info) => {
-        console.log(`Server is running on http://localhost:${info.port}`);
-        console.log(
-          `You can get the documentation at http://localhost:${info.port}/api/v1/scalar`,
-        );
-      },
-    );
-  } catch (error) {
-    console.log(error);
-  }
-};
+// const start = async () => {
+//   try {
+//     Promise.all([await producer.connect(), await consumer.connect()]);
+//     await runKafkaSubscriptions();
+//     serve(
+//       {
+//         fetch: app.fetch,
+//         port: 6002,
+//       },
+//       (info) => {
+//         console.log(`Server is running on http://localhost:${info.port}`);
+//         console.log(
+//           `You can get the documentation at http://localhost:${info.port}/api/v1/scalar`,
+//         );
+//       },
+//     );
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
-start();
+// start();
+
 openAPIConfiguration(app);
 export default app;
 export type AppType = typeof routes;
