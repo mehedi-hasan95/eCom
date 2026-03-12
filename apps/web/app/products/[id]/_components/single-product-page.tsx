@@ -25,7 +25,7 @@ export const SingleProductPage = ({ id }: Props) => {
   const { data, isLoading } = useQuery({
     queryKey: ["products", id],
     queryFn: () => getSingleProductAction(id),
-    staleTime: 5000 * 60 * 5,
+    staleTime: 5000 * 60,
     refetchOnMount: false,
   });
   const [selectedColor, setSelectedColor] = useState(data?.product?.color[0]);

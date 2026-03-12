@@ -5,7 +5,7 @@ export const useWishlistData = () => {
   const { data } = useQuery({
     queryKey: ["wishlist"],
     queryFn: getWishlistAction,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60,
   });
   return { data };
 };

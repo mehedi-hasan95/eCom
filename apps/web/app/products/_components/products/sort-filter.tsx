@@ -1,5 +1,6 @@
 "use client";
 import { useProductFilters } from "@/hooks/nuqs/use-nuqs";
+import { sortValueType } from "@workspace/open-api/lib/constants";
 import { Field, FieldLabel } from "@workspace/ui/components/field";
 import {
   Select,
@@ -16,8 +17,8 @@ const sortData = [
     value: "trending",
   },
   {
-    title: "Populer",
-    value: "populer",
+    title: "Popular",
+    value: "popular",
   },
   {
     title: "New Product",
@@ -54,15 +55,7 @@ export const SortFilter = () => {
         onValueChange={(value) =>
           setFilter({
             ...filter,
-            sort: value as
-              | "trending"
-              | "populer"
-              | "old"
-              | "new"
-              | "ascByName"
-              | "dscByName"
-              | "ascByPrice"
-              | "dscByPrice",
+            sort: value as sortValueType,
           })
         }
       >

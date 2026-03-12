@@ -14,12 +14,12 @@ const Page = async ({ children }: Props) => {
     queryClient.prefetchQuery({
       queryKey: ["categories"],
       queryFn: getCategoriesAction,
-      staleTime: 5000 * 60 * 5,
+      staleTime: 5000 * 60,
     }),
     queryClient.prefetchQuery({
       queryKey: ["subCategories"],
       queryFn: () => getSubCategoriesAction,
-      staleTime: 5000 * 60 * 5,
+      staleTime: 5000 * 60,
     }),
   ]);
   return <Suspense>{children}</Suspense>;

@@ -1,5 +1,6 @@
 import { Products } from "@workspace/db";
 import { sortValueType } from "@workspace/open-api/lib/constants";
+import { shortUser } from "@workspace/open-api/schemas/other.schema";
 import {
   deleteProductSchema,
   productCreateSchema,
@@ -162,11 +163,20 @@ type GetProductsParams = {
   cats?: string[];
   sort?: sortValueType;
   maxPrice?: number;
+  minPrice?: number;
+  sellerEmail?: string;
+  search?: string;
 };
 
 export const getAllProducts = async (params: GetProductsParams) => {
   const searchParams = new URLSearchParams();
 
+  if (params.search) {
+    searchParams.set("search", params.search);
+  }
+  if (params.sellerEmail) {
+    searchParams.set("sellerEmail", params.sellerEmail);
+  }
   if (params.cats?.length) {
     searchParams.set("cats", params.cats.join(","));
   }
@@ -179,6 +189,10 @@ export const getAllProducts = async (params: GetProductsParams) => {
     searchParams.set("maxPrice", params.maxPrice.toString());
   }
 
+  if (params.minPrice) {
+    searchParams.set("minPrice", params.minPrice.toString());
+  }
+
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/products/all-product?${searchParams.toString()}`,
   );
@@ -187,6 +201,12 @@ export const getAllProducts = async (params: GetProductsParams) => {
     const error = await response.json();
     throw error;
   }
-  const data = await response.json();
+  const data: {
+    products: (Products & {
+      seller: z.infer<typeof shortUser>;
+    })[];
+    lowPrice: number;
+    highPrice: number;
+  } = await response.json();
   return data;
 };

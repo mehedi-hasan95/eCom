@@ -5,6 +5,8 @@ import { WishlistCount } from "@/components/common/products/wishlist-count";
 import getQueryClient from "@/lib/query-client";
 import { getCategoriesAction } from "@/lib/actions/category/category-action";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { SearchFilter } from "./_components/products/search-filter";
+import { Suspense } from "react";
 
 interface Props {
   children: React.ReactNode;
@@ -20,8 +22,11 @@ const Page = async ({ children }: Props) => {
       <div className="flex-1 space-y-3">
         <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-sm">
           <div className="container-default px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-5">
               <Logo />
+              <Suspense>
+                <SearchFilter />
+              </Suspense>
               <div className="flex items-center gap-3">
                 <WishlistCount />
                 <AuthButton />

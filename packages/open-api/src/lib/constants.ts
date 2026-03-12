@@ -8,7 +8,7 @@ export const slugify = (str: string) =>
 
 export const sortValues = [
   "trending",
-  "populer",
+  "popular",
   "old",
   "new",
   "ascByName",

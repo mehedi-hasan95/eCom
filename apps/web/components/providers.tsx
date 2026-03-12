@@ -17,13 +17,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
       enableColorScheme
     >
-      <QueryClientProvider client={queryClient}>
-        <NuqsAdapter>
+      <NuqsAdapter>
+        <QueryClientProvider client={queryClient}>
           {children}
           <Toaster richColors />
           <ReactQueryDevtools initialIsOpen={false} />
-        </NuqsAdapter>
-      </QueryClientProvider>
+        </QueryClientProvider>
+      </NuqsAdapter>
     </NextThemesProvider>
   );
 }

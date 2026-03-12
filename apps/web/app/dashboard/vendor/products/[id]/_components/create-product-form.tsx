@@ -160,7 +160,7 @@ export const CreateProductForm = ({ id }: Props) => {
     },
   });
   async function onSubmit(data: z.input<typeof productCreateSchema>) {
-    if (initialData) {
+    if (initialData?.product) {
       updateMutation.mutate({
         id: initialData.product?.id,
         sellerEmail: initialData?.product?.userEmail,

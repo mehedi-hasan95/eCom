@@ -16,10 +16,10 @@ import { toast } from "sonner";
 export const ProductsPage = () => {
   const { user } = useGetSession();
   const { data } = useQuery({
-    queryKey: ["products", user?.email],
+    queryKey: ["all-products", user?.email],
     queryFn: () => getAllProductsAction(user?.email),
     enabled: !!user?.email,
-    staleTime: 5000 * 60 * 5,
+    staleTime: 5000 * 60,
   });
   const queryClient = useQueryClient();
 

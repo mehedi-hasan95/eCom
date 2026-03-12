@@ -7,9 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 
 export const HomeProducts = () => {
   const { data, isLoading } = useQuery({
-    queryKey: ["products"],
+    queryKey: ["all-products"],
     queryFn: () => getAllProductsAction(),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60,
   });
 
   if (isLoading) {

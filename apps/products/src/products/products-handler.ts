@@ -9,7 +9,7 @@ import {
 } from "./products-route";
 import { utapi } from "@workspace/uploadthing";
 import { Prisma, prisma } from "@workspace/db";
-import { producer } from "../utils/kafka";
+// import { producer } from "../utils/kafka";
 
 export const createProductHandler: RouteHandler<
   typeof createProductRoute
@@ -69,9 +69,14 @@ export const getSingleProductHandler: RouteHandler<
       _count: { _all: true },
     }),
   ]);
-  producer.send("product.activity", {
-    value: JSON.stringify({ id, action: "view-product" }),
-  });
+  /**
+   * ============================================================
+   * 📌 Used Kafka
+   * ============================================================
+   */
+  // producer.send("product.activity", {
+  //   value: JSON.stringify({ id, action: "view-product" }),
+  // });
   return c.json({ product, rating: ratingStats }, 200);
 };
 
@@ -137,7 +142,6 @@ export const deleteProductHandler: RouteHandler<
   typeof deleteProductRoute
 > = async (c) => {
   const { id, sellerEmail } = c.req.valid("json");
-  console.log(id, sellerEmail);
   const user = c.get("user");
   if (sellerEmail !== user?.email) {
     return c.json({ message: "Unauthorize user" }, 403);
@@ -159,10 +163,83 @@ export const deleteProductHandler: RouteHandler<
 export const getAllProductsHandler: RouteHandler<
   typeof getAllProductsRoute
 > = async (c) => {
-  const { cats, maxPrice, sort } = c.req.valid("query");
-  console.log("cats: ", maxPrice);
-  const getCats = cats?.split(",");
-  console.log("getCats", getCats);
-  console.log("sort:", sort);
-  return c.json({ getCats, maxPrice, sort });
+  const { cats, maxPrice, minPrice, sort, sellerEmail, search } =
+    c.req.valid("query");
+  const getCats = cats ? cats.split(",").filter(Boolean) : [];
+
+  let orderClause = Prisma.sql`ORDER BY boost_score DESC, p."createdAt" DESC`;
+
+  if (sort === "new") {
+    orderClause = Prisma.sql`ORDER BY p."createdAt" ASC`;
+  } else if (sort === "old") {
+    orderClause = Prisma.sql`ORDER BY p."createdAt" DESC`;
+  } else if (sort === "ascByName") {
+    orderClause = Prisma.sql`ORDER BY p."title" ASC`;
+  } else if (sort === "dscByName") {
+    orderClause = Prisma.sql`ORDER BY p."title" DESC`;
+  } else if (sort === "ascByPrice") {
+    orderClause = Prisma.sql`ORDER BY p."salePrice" ASC`;
+  } else if (sort === "dscByPrice") {
+    orderClause = Prisma.sql`ORDER BY p."salePrice" DESC`;
+  } else if (sort === "trending") {
+    orderClause = Prisma.sql`ORDER BY boost_score DESC, p."createdAt" DESC`;
+  } else if (sort === "popular") {
+    orderClause = Prisma.sql`ORDER BY pa."productSale" DESC`;
+  }
+
+  // ✅ seller filter
+  const sellerFilter = sellerEmail
+    ? Prisma.sql`AND p."userEmail" = ${sellerEmail}`
+    : Prisma.empty;
+  // ✅ Category filter
+  const catsFilter =
+    getCats.length > 0
+      ? Prisma.sql`AND p."categorySlug" IN (${Prisma.join(getCats)})`
+      : Prisma.empty;
+
+  //  ✅ Search filter
+  const searchFilter = search
+    ? Prisma.sql`AND p."title" ILIKE ${"%" + search + "%"} OR p."shortDescription" ILIKE ${"%" + search + "%"}`
+    : Prisma.empty;
+
+  const [products, priceRange] = await Promise.all([
+    prisma.$queryRaw`
+    SELECT 
+      p.*,
+      json_build_object( 'email', u."email", 'image', u."image", 'name', u."name", 'stripeCustomerId', u."stripeCustomerId", 'id', u."id" ) AS "seller",
+
+      CASE 
+        WHEN b."endAt" > NOW()
+        THEN b."coinSpent" / EXTRACT(EPOCH FROM (b."endAt" - NOW()))
+        ELSE 0
+      END AS boost_score
+      
+    FROM "Products" p
+
+    LEFT JOIN "user" u ON u."email" = p."userEmail"
+    LEFT JOIN "Boosting" b ON b."productId" = p."id"
+    LEFT JOIN "ProductAnalysis" pa ON pa."productId" = p."id"
+    WHERE 
+      
+      p."status" = 'active'
+      AND p."salePrice" >= ${minPrice ?? 0}
+      AND p."salePrice" <= ${maxPrice ?? 9999999999}
+      ${searchFilter}
+      ${sellerFilter}
+      ${catsFilter}
+      ${orderClause}
+  `,
+
+    prisma.products.aggregate({
+      where: { status: { equals: "active" } },
+      _min: { salePrice: true },
+      _max: { salePrice: true },
+    }),
+  ]);
+
+  return c.json({
+    products,
+    lowPrice: priceRange._min.salePrice,
+    highPrice: priceRange._max.salePrice,
+  });
 };

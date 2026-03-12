@@ -8,6 +8,7 @@ import {
 } from "nuqs/server";
 
 export const params = {
+  search: parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
   minPrice: parseAsInteger.withOptions({ clearOnDefault: true }),
   maxPrice: parseAsInteger.withOptions({ clearOnDefault: true }),
   cats: parseAsArrayOf(parseAsString)

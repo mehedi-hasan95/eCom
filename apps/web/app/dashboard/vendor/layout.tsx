@@ -11,14 +11,14 @@ const Page = async ({ children }: Props) => {
   const queryClient = getQueryClient();
   const session = await sessionAction();
   await queryClient.prefetchQuery({
-    queryKey: ["products", session?.user.email],
+    queryKey: ["all-products", session?.user.email],
     queryFn: () => getAllProductsAction(session?.user.email),
-    staleTime: 5000 * 60 * 5,
+    staleTime: 5000 * 60,
   });
   await queryClient.prefetchQuery({
     queryKey: ["categories"],
     queryFn: getCategoriesAction,
-    staleTime: 5000 * 60 * 5,
+    staleTime: 5000 * 60,
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

@@ -30,7 +30,7 @@ export default async function RootLayout({
     queryFn: sessionAction,
   });
   await queryClient.prefetchQuery({
-    queryKey: ["products"],
+    queryKey: ["all-products"],
     queryFn: () => getAllProductsAction(),
   });
   await queryClient.prefetchQuery({

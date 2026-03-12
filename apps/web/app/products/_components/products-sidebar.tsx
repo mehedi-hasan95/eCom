@@ -1,12 +1,15 @@
 "use client";
 
 import { useProductFilters } from "@/hooks/nuqs/use-nuqs";
-import { PriceSlider } from "./products/price-filter";
 import { Button } from "@workspace/ui/components/button";
 import { CategoryFilter } from "./products/category-filter";
 import { SortFilter } from "./products/sort-filter";
+import { PriceFilter } from "./products/price-filter";
 
-export const ProductsSidebar = () => {
+interface Props {
+  highPrice: number;
+}
+export const ProductsSidebar = ({ highPrice }: Props) => {
   const [filters, setFilters] = useProductFilters();
 
   const onChange = (key: keyof typeof filters, value: unknown) => {
@@ -18,6 +21,7 @@ export const ProductsSidebar = () => {
       minPrice: null,
       sort: null,
       cats: [],
+      search: "",
     });
   };
   return (
@@ -35,9 +39,9 @@ export const ProductsSidebar = () => {
 
       <div className="space-y-10 ">
         <SortFilter />
-        <PriceSlider
-          minPrice={filters.minPrice}
-          maxPrice={filters.maxPrice}
+        <PriceFilter
+          minPrice={0}
+          maxPrice={highPrice}
           onMinPriceChange={(value) => onChange("minPrice", value)}
           onMaxPriceChange={(value) => onChange("maxPrice", value)}
         />

@@ -32,11 +32,13 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  stripeCustomerId String?
-  stripeVerified   Boolean    @default(false)
-  products         Products[]
-  wishLists        WishList[]
-  ratings          Ratings[]
+  stripeCustomerId   String?
+  stripeVerified     Boolean             @default(false)
+  products           Products[]
+  wishLists          WishList[]
+  ratings            Ratings[]
+  wallets            Wallet[]
+  creditTransactions CreditTransaction[]
 
   @@unique([email])
   @@map("user")
@@ -158,6 +160,7 @@ model Products {
   wishLists       WishList[]
   ratings         Ratings?
   productAnalyses ProductAnalysis[]
+  boostings       Boosting[]
 
   @@index([id])
 }
@@ -201,4 +204,45 @@ model ProductAnalysis {
   updatedAt    DateTime @updatedAt
 
   @@unique([productId])
+}
+
+model Wallet {
+  id        String @id @default(uuid())
+  balance   Int    @default(0)
+  userEmail String
+  user      User   @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+}
+
+model Boosting {
+  id                 String              @id @default(uuid())
+  coinSpent          Int                 @default(0)
+  boostScore         Float               @default(0)
+  productId          String
+  product            Products            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  endAt              DateTime
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  creditTransactions CreditTransaction[]
+
+  @@index([endAt])
+  @@index([productId])
+  @@index([coinSpent])
+}
+
+enum TransactionType {
+  PURCHASE // user buys credits
+  BOOST_SPEND // credits used for boosting
+}
+
+model CreditTransaction {
+  id        String          @id @default(uuid())
+  amount    Int
+  type      TransactionType
+  createdAt DateTime        @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  boostId String?
+  boost   Boosting? @relation(fields: [boostId], references: [id])
 }

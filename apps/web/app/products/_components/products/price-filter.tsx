@@ -13,34 +13,31 @@ interface Props {
   onMaxPriceChange: (value: number) => void;
 }
 
-export const PriceSlider = ({
-  onMaxPriceChange,
-  onMinPriceChange,
-  maxPrice,
+export const PriceFilter = ({
   minPrice,
+  maxPrice,
+  onMinPriceChange,
+  onMaxPriceChange,
 }: Props) => {
-  const absoluteMin = 0;
-  const absoluteMax = 2000;
+  const absoluteMin = minPrice ?? 0;
+  const absoluteMax = maxPrice ?? 1000;
 
   const [priceRange, setPriceRange] = useState<[number, number]>([
-    minPrice ?? 200,
-    maxPrice ?? 800,
+    absoluteMin,
+    absoluteMax,
   ]);
 
   const debouncedMin = useDebounce(priceRange[0], 400);
   const debouncedMax = useDebounce(priceRange[1], 400);
 
-  // prevent infinite loop
   useEffect(() => {
-    if (debouncedMin !== minPrice) {
-      onMinPriceChange(debouncedMin);
-    }
+    onMinPriceChange(debouncedMin);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedMin]);
 
   useEffect(() => {
-    if (debouncedMax !== maxPrice) {
-      onMaxPriceChange(debouncedMax);
-    }
+    onMaxPriceChange(debouncedMax);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedMax]);
 
   const handleSliderChange = (value: [number, number]) => {
@@ -48,19 +45,19 @@ export const PriceSlider = ({
   };
 
   const handleMinInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number.parseFloat(e.target.value) || 0;
-
-    const clampedValue = Math.min(Math.max(value, absoluteMin), priceRange[1]);
-
-    setPriceRange([clampedValue, priceRange[1]]);
+    const value = Number(e.target.value) || 0;
+    setPriceRange(([_, max]) => [
+      Math.min(Math.max(value, absoluteMin), max),
+      max,
+    ]);
   };
 
   const handleMaxInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number.parseFloat(e.target.value) || 0;
-
-    const clampedValue = Math.min(Math.max(value, priceRange[0]), absoluteMax);
-
-    setPriceRange([priceRange[0], clampedValue]);
+    const value = Number(e.target.value) || 0;
+    setPriceRange(([min, _]) => [
+      min,
+      Math.min(Math.max(value, min), absoluteMax),
+    ]);
   };
 
   return (
@@ -71,9 +68,9 @@ export const PriceSlider = ({
         <Slider
           value={priceRange}
           onValueChange={handleSliderChange}
-          max={absoluteMax}
           min={absoluteMin}
-          step={10}
+          max={absoluteMax}
+          step={1}
           className="mx-auto w-full max-w-xs"
         />
 
@@ -84,13 +81,10 @@ export const PriceSlider = ({
       </div>
 
       <div className="flex justify-between gap-4">
-        {/* Min */}
         <div className="space-y-2">
           <Label htmlFor="min-price-input">Minimum Price</Label>
-
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-
             <Input
               id="min-price-input"
               type="number"
@@ -98,19 +92,16 @@ export const PriceSlider = ({
               onChange={handleMinInputChange}
               min={absoluteMin}
               max={priceRange[1]}
-              step={10}
+              step={1}
               className="pl-8"
             />
           </div>
         </div>
 
-        {/* Max */}
         <div className="space-y-2">
           <Label htmlFor="max-price-input">Maximum Price</Label>
-
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-
             <Input
               id="max-price-input"
               type="number"
@@ -118,7 +109,7 @@ export const PriceSlider = ({
               onChange={handleMaxInputChange}
               min={priceRange[0]}
               max={absoluteMax}
-              step={10}
+              step={1}
               className="pl-8"
             />
           </div>

@@ -131,6 +131,9 @@ export const getAllProductsRoute = createRoute({
       sort: z.enum(sortValues).optional(),
       cats: z.string().optional(),
       maxPrice: z.coerce.number().optional(),
+      minPrice: z.coerce.number().optional(),
+      sellerEmail: z.string().optional(),
+      search: z.string().optional(),
     }),
   },
   responses: {
