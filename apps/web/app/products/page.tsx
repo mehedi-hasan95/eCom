@@ -23,15 +23,25 @@ const Page = async ({ searchParams }: Props) => {
   const minPrice = params.minPrice ? Number(params.minPrice) : undefined;
   const search = params.search ?? "";
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery({
+  await queryClient.prefetchInfiniteQuery({
     queryKey: ["products", cats, sort, maxPrice, minPrice, search],
-    queryFn: () => getAllProducts({ cats, sort, maxPrice, minPrice, search }),
+    queryFn: ({ pageParam }) =>
+      getAllProducts({
+        cats,
+        sort,
+        maxPrice,
+        minPrice,
+        search,
+        cursor: pageParam,
+        limit: 10,
+      }),
+    initialPageParam: null,
+    staleTime: 1000 * 60 * 5,
   });
 
-  console.log(maxPrice);
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense>
+      <Suspense fallback={<>Loading...</>}>
         <AllProductPage />
       </Suspense>
     </HydrationBoundary>

@@ -9,6 +9,7 @@ import {
 } from "./products-route";
 import { utapi } from "@workspace/uploadthing";
 import { Prisma, prisma } from "@workspace/db";
+import { sortValueType } from "@workspace/open-api/lib/constants";
 // import { producer } from "../utils/kafka";
 
 export const createProductHandler: RouteHandler<
@@ -163,82 +164,71 @@ export const deleteProductHandler: RouteHandler<
 export const getAllProductsHandler: RouteHandler<
   typeof getAllProductsRoute
 > = async (c) => {
-  const { cats, maxPrice, minPrice, sort, sellerEmail, search } =
+  const { cats, maxPrice, minPrice, sort, sellerEmail, search, limit, cursor } =
     c.req.valid("query");
-  const getCats = cats ? cats.split(",").filter(Boolean) : [];
 
-  let orderClause = Prisma.sql`ORDER BY boost_score DESC, p."createdAt" DESC`;
+  const categories = cats ? cats.split(",").filter(Boolean) : [];
 
-  if (sort === "new") {
-    orderClause = Prisma.sql`ORDER BY p."createdAt" ASC`;
-  } else if (sort === "old") {
-    orderClause = Prisma.sql`ORDER BY p."createdAt" DESC`;
-  } else if (sort === "ascByName") {
-    orderClause = Prisma.sql`ORDER BY p."title" ASC`;
-  } else if (sort === "dscByName") {
-    orderClause = Prisma.sql`ORDER BY p."title" DESC`;
-  } else if (sort === "ascByPrice") {
-    orderClause = Prisma.sql`ORDER BY p."salePrice" ASC`;
-  } else if (sort === "dscByPrice") {
-    orderClause = Prisma.sql`ORDER BY p."salePrice" DESC`;
-  } else if (sort === "trending") {
-    orderClause = Prisma.sql`ORDER BY boost_score DESC, p."createdAt" DESC`;
-  } else if (sort === "popular") {
-    orderClause = Prisma.sql`ORDER BY pa."productSale" DESC`;
-  }
-
-  // ✅ seller filter
-  const sellerFilter = sellerEmail
-    ? Prisma.sql`AND p."userEmail" = ${sellerEmail}`
-    : Prisma.empty;
-  // ✅ Category filter
-  const catsFilter =
-    getCats.length > 0
-      ? Prisma.sql`AND p."categorySlug" IN (${Prisma.join(getCats)})`
-      : Prisma.empty;
-
-  //  ✅ Search filter
-  const searchFilter = search
-    ? Prisma.sql`AND p."title" ILIKE ${"%" + search + "%"} OR p."shortDescription" ILIKE ${"%" + search + "%"}`
-    : Prisma.empty;
-
+  const sortMap: Record<
+    sortValueType,
+    Prisma.ProductsOrderByWithRelationInput
+  > = {
+    ascByPrice: { salePrice: "asc" },
+    dscByPrice: { salePrice: "desc" },
+    ascByName: { title: "asc" },
+    dscByName: { title: "desc" },
+    new: { createdAt: "desc" },
+    old: { createdAt: "asc" },
+    popular: { productAnalyses: { productViews: "desc" } },
+    trending: { boostings: { spendingAvg: "asc" } },
+  };
   const [products, priceRange] = await Promise.all([
-    prisma.$queryRaw`
-    SELECT 
-      p.*,
-      json_build_object( 'email', u."email", 'image', u."image", 'name', u."name", 'stripeCustomerId', u."stripeCustomerId", 'id', u."id" ) AS "seller",
+    prisma.products.findMany({
+      take: limit + 1,
+      cursor: cursor ? { id: cursor } : undefined,
+      skip: cursor ? 1 : 0,
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            image: true,
+            name: true,
+            stripeCustomerId: true,
+          },
+        },
+      },
+      where: {
+        status: "active",
 
-      CASE 
-        WHEN b."endAt" > NOW()
-        THEN b."coinSpent" / EXTRACT(EPOCH FROM (b."endAt" - NOW()))
-        ELSE 0
-      END AS boost_score
-      
-    FROM "Products" p
-
-    LEFT JOIN "user" u ON u."email" = p."userEmail"
-    LEFT JOIN "Boosting" b ON b."productId" = p."id"
-    LEFT JOIN "ProductAnalysis" pa ON pa."productId" = p."id"
-    WHERE 
-      
-      p."status" = 'active'
-      AND p."salePrice" >= ${minPrice ?? 0}
-      AND p."salePrice" <= ${maxPrice ?? 9999999999}
-      ${searchFilter}
-      ${sellerFilter}
-      ${catsFilter}
-      ${orderClause}
-  `,
+        userEmail: sellerEmail,
+        salePrice: { gte: minPrice ?? undefined, lte: maxPrice ?? undefined },
+        title: { contains: search, mode: "insensitive" },
+        OR: [
+          {
+            title: { contains: search, mode: "insensitive" },
+            shortDescription: { contains: search, mode: "insensitive" },
+          },
+        ],
+        category: categories.length ? { slug: { in: categories } } : undefined,
+      },
+      orderBy: [sortMap[sort as sortValueType]],
+    }),
 
     prisma.products.aggregate({
-      where: { status: { equals: "active" } },
+      where: { status: "active" },
       _min: { salePrice: true },
       _max: { salePrice: true },
     }),
   ]);
 
+  const hasMore = products.length > limit;
+  const items = hasMore ? products.slice(0, -1) : products;
+  const nextCursor = hasMore ? items[items.length - 1]?.id : null;
+
   return c.json({
     products,
+    nextCursor,
     lowPrice: priceRange._min.salePrice,
     highPrice: priceRange._max.salePrice,
   });

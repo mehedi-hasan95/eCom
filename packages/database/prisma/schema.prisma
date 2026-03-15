@@ -155,12 +155,12 @@ model Products {
   userEmail        String
   user             User          @relation(fields: [userEmail], references: [email], onDelete: Cascade)
 
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   wishLists       WishList[]
   ratings         Ratings?
-  productAnalyses ProductAnalysis[]
-  boostings       Boosting[]
+  productAnalyses ProductAnalysis?
+  boostings       Boosting?
 
   @@index([id])
 }
@@ -216,7 +216,7 @@ model Wallet {
 model Boosting {
   id                 String              @id @default(uuid())
   coinSpent          Int                 @default(0)
-  boostScore         Float               @default(0)
+  spendingAvg        Int                 @default(0)
   productId          String
   product            Products            @relation(fields: [productId], references: [id], onDelete: Cascade)
   endAt              DateTime
@@ -224,9 +224,11 @@ model Boosting {
   updatedAt          DateTime            @updatedAt
   creditTransactions CreditTransaction[]
 
+  @@unique([productId])
   @@index([endAt])
   @@index([productId])
   @@index([coinSpent])
+  @@index([spendingAvg])
 }
 
 enum TransactionType {

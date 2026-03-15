@@ -28,6 +28,10 @@ export const SearchFilter = ({
     });
   }, [debouncedSearch, setFilters]);
 
+  useEffect(() => {
+    setSearchValue(filters.search ?? "");
+  }, [filters.search]);
+
   return (
     <div className={cn("relative w-full lg:max-w-2xl", className)}>
       <Search className="absolute top-1/2 -translate-y-1/2 left-3 size-4" />

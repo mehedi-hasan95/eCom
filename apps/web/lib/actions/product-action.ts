@@ -166,47 +166,41 @@ type GetProductsParams = {
   minPrice?: number;
   sellerEmail?: string;
   search?: string;
+
+  // pagination
+  cursor?: string | null;
+  limit?: number;
 };
 
 export const getAllProducts = async (params: GetProductsParams) => {
   const searchParams = new URLSearchParams();
+  // if (params.search) {
+  //   searchParams.set("search", params.search);
+  // }
 
-  if (params.search) {
-    searchParams.set("search", params.search);
-  }
-  if (params.sellerEmail) {
-    searchParams.set("sellerEmail", params.sellerEmail);
-  }
-  if (params.cats?.length) {
-    searchParams.set("cats", params.cats.join(","));
-  }
-
-  if (params.sort) {
-    searchParams.set("sort", params.sort);
-  }
-
-  if (params.maxPrice) {
-    searchParams.set("maxPrice", params.maxPrice.toString());
-  }
-
-  if (params.minPrice) {
-    searchParams.set("minPrice", params.minPrice.toString());
-  }
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      searchParams.set(
+        key,
+        Array.isArray(value) ? value.join(",") : String(value),
+      );
+    }
+  });
 
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/products/all-product?${searchParams.toString()}`,
   );
-
   if (!response.ok) {
     const error = await response.json();
     throw error;
   }
   const data: {
     products: (Products & {
-      seller: z.infer<typeof shortUser>;
+      user: z.infer<typeof shortUser>;
     })[];
     lowPrice: number;
     highPrice: number;
+    nextCursor: any;
   } = await response.json();
   return data;
 };

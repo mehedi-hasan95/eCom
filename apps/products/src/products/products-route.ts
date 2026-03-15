@@ -125,7 +125,7 @@ export const deleteProductRoute = createRoute({
 export const getAllProductsRoute = createRoute({
   method: "get",
   path: "/all-product",
-  tags,
+  tags: ["Products"],
   request: {
     query: z.object({
       sort: z.enum(sortValues).optional(),
@@ -134,12 +134,16 @@ export const getAllProductsRoute = createRoute({
       minPrice: z.coerce.number().optional(),
       sellerEmail: z.string().optional(),
       search: z.string().optional(),
+      cursor: z.string().nullish(),
+      limit: z.coerce.number().min(1).max(50).default(10),
     }),
   },
   responses: {
     200: {
       description: "All products",
     },
-    404: { description: "Not found" },
+    404: {
+      description: "Not found",
+    },
   },
 });
