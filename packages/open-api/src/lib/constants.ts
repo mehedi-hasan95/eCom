@@ -18,3 +18,5 @@ export const sortValues = [
 ] as const;
 
 export type sortValueType = (typeof sortValues)[number];
+
+export const DEFAULT_LIMIT = Number(10);

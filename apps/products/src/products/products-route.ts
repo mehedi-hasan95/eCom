@@ -5,7 +5,7 @@ import {
   productSchemasForserver,
   updateProductSchemasForserver,
 } from "@workspace/open-api/schemas/product.schemas";
-import { sortValues } from "@workspace/open-api/lib/constants";
+import { DEFAULT_LIMIT, sortValues } from "@workspace/open-api/lib/constants";
 
 const tags = ["Products"];
 
@@ -135,7 +135,7 @@ export const getAllProductsRoute = createRoute({
       sellerEmail: z.string().optional(),
       search: z.string().optional(),
       cursor: z.string().nullish(),
-      limit: z.coerce.number().min(1).max(50).default(10),
+      limit: z.coerce.number().min(1).max(50).default(DEFAULT_LIMIT),
     }),
   },
   responses: {

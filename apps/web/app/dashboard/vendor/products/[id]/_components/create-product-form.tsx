@@ -141,7 +141,9 @@ export const CreateProductForm = ({ id }: Props) => {
   const createMutation = useMutation({
     mutationFn: productCreateAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products", user?.email] });
+      queryClient.invalidateQueries({
+        queryKey: ["all-products", user?.email],
+      });
       toast.success("Product create successfully");
       router.push("/dashboard/vendor/products");
     },
@@ -151,8 +153,10 @@ export const CreateProductForm = ({ id }: Props) => {
     mutationFn: productUpdateAction,
     onSuccess: (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["products", user?.email] });
-      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({
+        queryKey: ["all-products", user?.email],
+      });
+      queryClient.invalidateQueries({ queryKey: ["all-products"] });
       router.push("/dashboard/vendor/products");
     },
     onError: (error) => {
