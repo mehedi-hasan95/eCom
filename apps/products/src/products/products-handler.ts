@@ -25,6 +25,8 @@ export const createProductHandler: RouteHandler<
       ...data,
       images: imageLinks as string[],
       userEmail: user?.email!,
+      productAnalyses: { create: {} },
+      boostings: { create: {} },
     },
   });
 
@@ -180,47 +182,39 @@ export const getAllProductsHandler: RouteHandler<
     new: { createdAt: "desc" },
     old: { createdAt: "asc" },
     popular: { productAnalyses: { productViews: "desc" } },
-    trending: { boostings: { spendingAvg: "asc" } },
+    trending: { boostings: { spendingAvg: "desc" } },
   };
-  const [products, priceRange] = await Promise.all([
-    prisma.products.findMany({
-      take: limit + 1,
-      cursor: cursor ? { id: cursor } : undefined,
-      skip: cursor ? 1 : 0,
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            image: true,
-            name: true,
-            stripeCustomerId: true,
-          },
+  const products = await prisma.products.findMany({
+    take: limit + 1,
+    cursor: cursor ? { id: cursor } : undefined,
+    skip: cursor ? 1 : 0,
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          image: true,
+          name: true,
+          stripeCustomerId: true,
         },
       },
-      where: {
-        status: "active",
+    },
+    where: {
+      status: "active",
 
-        userEmail: sellerEmail,
-        salePrice: { gte: minPrice ?? undefined, lte: maxPrice ?? undefined },
-        title: { contains: search, mode: "insensitive" },
-        OR: [
-          {
-            title: { contains: search, mode: "insensitive" },
-            shortDescription: { contains: search, mode: "insensitive" },
-          },
-        ],
-        category: categories.length ? { slug: { in: categories } } : undefined,
-      },
-      orderBy: [sortMap[sort as sortValueType]],
-    }),
-
-    prisma.products.aggregate({
-      where: { status: "active" },
-      _min: { salePrice: true },
-      _max: { salePrice: true },
-    }),
-  ]);
+      userEmail: sellerEmail,
+      salePrice: { gte: minPrice ?? undefined, lte: maxPrice ?? undefined },
+      title: { contains: search, mode: "insensitive" },
+      OR: [
+        {
+          title: { contains: search, mode: "insensitive" },
+          shortDescription: { contains: search, mode: "insensitive" },
+        },
+      ],
+      category: categories.length ? { slug: { in: categories } } : undefined,
+    },
+    orderBy: [sortMap[sort as sortValueType]],
+  });
 
   const hasMore = products.length > limit;
   const items = hasMore ? products.slice(0, -1) : products;
@@ -229,7 +223,5 @@ export const getAllProductsHandler: RouteHandler<
   return c.json({
     products,
     nextCursor,
-    lowPrice: priceRange._min.salePrice,
-    highPrice: priceRange._max.salePrice,
   });
 };

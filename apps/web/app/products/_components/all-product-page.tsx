@@ -3,7 +3,10 @@ import { ProductCard } from "@/components/common/products/product-card";
 import { ProductsSidebar } from "./products-sidebar";
 import { useProductFilters } from "@/hooks/nuqs/use-nuqs";
 import { NoProduct } from "../../../components/common/products/no-product";
-import { sortValueType } from "@workspace/open-api/lib/constants";
+import {
+  DEFAULT_LIMIT,
+  sortValueType,
+} from "@workspace/open-api/lib/constants";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { getAllProducts } from "@/lib/actions/product-action";
 import { InfinityScroll } from "@/components/common/products/infinity-scroll";
@@ -35,7 +38,7 @@ export const AllProductPage = ({ isManual = false }: Props) => {
           minPrice,
           search,
           cursor: pageParam,
-          limit: 10,
+          limit: DEFAULT_LIMIT,
         }),
       initialPageParam: null,
       getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
@@ -58,7 +61,6 @@ export const AllProductPage = ({ isManual = false }: Props) => {
       data.pages.flatMap((page) => page.products).map((p) => [p.id, p]),
     ).values(),
   );
-
   return (
     <div className="container-default flex relative">
       <div className="hidden lg:block w-1/4 bg-slate-200 dark:bg-slate-900 p-4 relative">
@@ -67,30 +69,38 @@ export const AllProductPage = ({ isManual = false }: Props) => {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-1 gap-5 px-4 w-3/4">
-        {products.map((item) => (
-          <ProductCard
-            key={item.id}
-            productId={item.id}
-            image={item.images[0] || ""}
-            isTrending={sortLabel ?? "Trending"}
-            price={item.salePrice}
-            basePrice={item.basePrice}
-            sellerName={"mehedi"}
-            title={item.title}
-            colors={item.color}
-            sellerImage={item.user.image}
-            id={item.id}
-          />
-        ))}
+      <div className="w-3/4">
+        {products.length > 0 ? (
+          <>
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5 px-4">
+              {products.map((item) => (
+                <ProductCard
+                  key={item.id}
+                  productId={item.id}
+                  image={item.images[0] || ""}
+                  isTrending={sortLabel ?? "Trending"}
+                  price={item.salePrice}
+                  basePrice={item.basePrice}
+                  sellerName={"mehedi"}
+                  title={item.title}
+                  colors={item.color}
+                  sellerImage={item.user.image}
+                  id={item.id}
+                />
+              ))}
+            </div>
+            <InfinityScroll
+              fetchNextPage={fetchNextPage}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              finishText="No More"
+              isManual={isManual}
+            />
+          </>
+        ) : (
+          <NoProduct />
+        )}
       </div>
-      <InfinityScroll
-        fetchNextPage={fetchNextPage}
-        hasNextPage={hasNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        finishText="No More"
-        isManual={isManual}
-      />
     </div>
   );
 };

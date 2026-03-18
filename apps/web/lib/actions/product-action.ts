@@ -198,8 +198,6 @@ export const getAllProducts = async (params: GetProductsParams) => {
     products: (Products & {
       user: z.infer<typeof shortUser>;
     })[];
-    lowPrice: number;
-    highPrice: number;
     nextCursor: any;
   } = await response.json();
   return data;

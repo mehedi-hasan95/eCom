@@ -1,4 +1,5 @@
 import { serve } from "@hono/node-server";
+import cron from "node-cron";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import {
   defaultHook,
@@ -10,6 +11,7 @@ import products from "./products/products-index";
 import admin from "./admin/admin-index";
 import categories from "./categories/categories-index";
 import wishlist from "./wishlist/wishlist-index";
+import { prisma } from "@workspace/db";
 
 const app = new OpenAPIHono({
   defaultHook,
@@ -29,6 +31,18 @@ const routes = app
   .route("/categories", categories)
   .route("/wishlist", wishlist);
 
+cron.schedule("0 * * * *", async () => {
+  try {
+    await prisma.boosting.updateMany({
+      where: { endAt: { gte: new Date() } },
+      data: {
+        spendingAvg: 0,
+      },
+    });
+  } catch (error) {
+    console.error("Something went wrong");
+  }
+});
 app.onError((err, c) => {
   if (err instanceof HTTPException) {
     return err.getResponse();

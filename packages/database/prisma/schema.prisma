@@ -215,19 +215,16 @@ model Wallet {
 
 model Boosting {
   id                 String              @id @default(uuid())
-  coinSpent          Int                 @default(0)
   spendingAvg        Int                 @default(0)
   productId          String
   product            Products            @relation(fields: [productId], references: [id], onDelete: Cascade)
-  endAt              DateTime
+  endAt              DateTime?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   creditTransactions CreditTransaction[]
 
   @@unique([productId])
   @@index([endAt])
-  @@index([productId])
-  @@index([coinSpent])
   @@index([spendingAvg])
 }
 

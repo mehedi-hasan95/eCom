@@ -3,7 +3,10 @@ import { loadSearchParams } from "@/hooks/nuqs/nuqs-server";
 import getQueryClient from "@/lib/query-client";
 import { getAllProducts } from "@/lib/actions/product-action";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { sortValueType } from "@workspace/open-api/lib/constants";
+import {
+  DEFAULT_LIMIT,
+  sortValueType,
+} from "@workspace/open-api/lib/constants";
 import { Suspense } from "react";
 import { AllProductPage } from "./_components/all-product-page";
 
@@ -33,7 +36,7 @@ const Page = async ({ searchParams }: Props) => {
         minPrice,
         search,
         cursor: pageParam,
-        limit: 10,
+        limit: DEFAULT_LIMIT,
       }),
     initialPageParam: null,
     staleTime: 1000 * 60 * 5,

@@ -27,28 +27,28 @@ export const ProductsPage = () => {
     mutationFn: deleteProductAction,
     onMutate: async (deleteCat) => {
       await queryClient.cancelQueries({
-        queryKey: ["products", user?.email, deleteCat.sellerEmail],
+        queryKey: ["all-products", user?.email, deleteCat.sellerEmail],
       });
       const previousCat = queryClient.getQueryData([
-        "products",
+        "all-products",
         user?.email,
         deleteCat.sellerEmail,
       ]);
       queryClient.setQueryData(
-        ["products", user?.email, deleteCat.sellerEmail],
+        ["all-products", user?.email, deleteCat.sellerEmail],
         deleteCat,
       );
       return { previousCat, deleteCat };
     },
     onError: (err, deleteCat, onMutateResult) => {
       queryClient.setQueryData(
-        ["products", user?.email, onMutateResult?.deleteCat.sellerEmail],
+        ["all-products", user?.email, onMutateResult?.deleteCat.sellerEmail],
         onMutateResult?.previousCat,
       );
     },
     onSettled: (deleteCat) => {
       queryClient.invalidateQueries({
-        queryKey: ["products", user?.email, deleteCat.sellerEmail],
+        queryKey: ["all-products", user?.email, deleteCat.sellerEmail],
       });
       toast.success("Product delete successfully");
     },
