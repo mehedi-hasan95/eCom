@@ -1,7 +1,7 @@
 import { Logo } from "@/components/common/logo";
-import { ShoppingBag } from "lucide-react";
 import { AuthButton } from "./auth-button";
 import { WishlistCount } from "@/components/common/products/wishlist-count";
+import { GetAddToCart } from "@/components/common/products/get-add-to-cart";
 
 export const NavHeader = () => {
   return (
@@ -9,7 +9,7 @@ export const NavHeader = () => {
       <Logo />
       <div className="flex items-center gap-4 relative">
         <WishlistCount />
-        <ShoppingBag />
+        <GetAddToCart />
         <AuthButton />
       </div>
     </div>

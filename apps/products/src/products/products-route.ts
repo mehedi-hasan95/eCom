@@ -1,6 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
-import { sellerMiddleware } from "../middleware";
+import { authMiddleware, sellerMiddleware } from "../middleware";
 import {
+  addToCartSchema,
   deleteProductSchema,
   productSchemasForserver,
   updateProductSchemasForserver,
@@ -126,6 +127,7 @@ export const getAllProductsRoute = createRoute({
   method: "get",
   path: "/all-product",
   tags: ["Products"],
+  summary: "All products with infinity scroll",
   request: {
     query: z.object({
       sort: z.enum(sortValues).optional(),
@@ -145,5 +147,84 @@ export const getAllProductsRoute = createRoute({
     404: {
       description: "Not found",
     },
+  },
+});
+
+export const productPriceRoute = createRoute({
+  method: "get",
+  path: "/price-range",
+  summary: "Min & Max price",
+  tags,
+  responses: {
+    200: { description: "OK" },
+    500: { description: "Internal server error" },
+  },
+});
+
+export const addToCartRoute = createRoute({
+  method: "patch",
+  path: "create-add-to-cart",
+  summary: "Add to Cart",
+  tags,
+  middleware: authMiddleware,
+  request: {
+    body: { content: { "application/json": { schema: addToCartSchema } } },
+  },
+  responses: {
+    201: {
+      description: "CREATED",
+      content: { "application/json": { schema: addToCartSchema } },
+    },
+    401: { description: "Unauthorize User" },
+    500: { description: "Internal server error" },
+  },
+});
+
+export const allAddToCartRoute = createRoute({
+  method: "get",
+  path: "add-to-cart",
+  tags,
+  middleware: authMiddleware,
+  summary: "Get all add to cart",
+  responses: {
+    200: { description: "OK" },
+    500: { description: "Internal server error" },
+  },
+});
+
+export const removeACartRoute = createRoute({
+  method: "delete",
+  path: "remove-a-cart",
+  tags,
+  middleware: authMiddleware,
+  summary: "Remove a cart",
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: z.object({ productId: z.string() }) },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Remove a cart",
+    },
+    401: { description: "Unauthorize User" },
+    500: { description: "Internal server error" },
+  },
+});
+
+export const removeAllCartRoute = createRoute({
+  method: "delete",
+  path: "remove-all-cart",
+  tags,
+  middleware: authMiddleware,
+  summary: "Remove all cart",
+  responses: {
+    201: {
+      description: "Remove all cart",
+    },
+    401: { description: "Unauthorize User" },
+    500: { description: "Internal server error" },
   },
 });

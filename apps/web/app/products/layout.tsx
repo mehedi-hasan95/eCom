@@ -7,6 +7,7 @@ import { getCategoriesAction } from "@/lib/actions/category/category-action";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { SearchFilter } from "./_components/products/search-filter";
 import { Suspense } from "react";
+import { GetAddToCart } from "@/components/common/products/get-add-to-cart";
 
 interface Props {
   children: React.ReactNode;
@@ -29,6 +30,7 @@ const Page = async ({ children }: Props) => {
               </Suspense>
               <div className="flex items-center gap-3">
                 <WishlistCount />
+                <GetAddToCart />
                 <AuthButton />
               </div>
             </div>

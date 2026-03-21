@@ -35,6 +35,7 @@ export const HomeProducts = () => {
             colors={item.color}
             sellerImage={item.user.image}
             id={item.id}
+            sizes={item.sizes}
           />
         ))}
       </div>

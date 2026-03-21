@@ -5,7 +5,10 @@ import { Providers } from "@/components/providers";
 import getQueryClient from "@/lib/query-client";
 import { sessionAction } from "@/lib/actions/auth-server-action";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { getAllProductsAction } from "@/lib/actions/product-action";
+import {
+  getAddToCartAction,
+  getAllProductsAction,
+} from "@/lib/actions/product-action";
 import { getWishlistAction } from "@/lib/actions/wishlist-action";
 import { Metadata } from "next";
 
@@ -36,6 +39,10 @@ export default async function RootLayout({
   await queryClient.prefetchQuery({
     queryKey: ["wishlist"],
     queryFn: getWishlistAction,
+  });
+  await queryClient.prefetchQuery({
+    queryKey: ["wishlist"],
+    queryFn: getAddToCartAction,
   });
   return (
     <html lang="en" suppressHydrationWarning>
