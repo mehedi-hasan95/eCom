@@ -1,10 +1,15 @@
 import { RouteHandler } from "@hono/zod-openapi";
 import {
+  addToCartRoute,
+  allAddToCartRoute,
   createProductRoute,
   deleteProductRoute,
   getAllProductsRoute,
   getProductsRoute,
   getSingleProductRoute,
+  productPriceRoute,
+  removeACartRoute,
+  removeAllCartRoute,
   updateProductRoute,
 } from "./products-route";
 import { utapi } from "@workspace/uploadthing";
@@ -205,12 +210,15 @@ export const getAllProductsHandler: RouteHandler<
       userEmail: sellerEmail,
       salePrice: { gte: minPrice ?? undefined, lte: maxPrice ?? undefined },
       title: { contains: search, mode: "insensitive" },
-      OR: [
-        {
-          title: { contains: search, mode: "insensitive" },
-          shortDescription: { contains: search, mode: "insensitive" },
-        },
-      ],
+
+      OR: search
+        ? [
+            {
+              title: { contains: search, mode: "insensitive" },
+              shortDescription: { contains: search, mode: "insensitive" },
+            },
+          ]
+        : undefined,
       category: categories.length ? { slug: { in: categories } } : undefined,
     },
     orderBy: [sortMap[sort as sortValueType]],
@@ -221,7 +229,95 @@ export const getAllProductsHandler: RouteHandler<
   const nextCursor = hasMore ? items[items.length - 1]?.id : null;
 
   return c.json({
-    products,
+    products: items,
     nextCursor,
   });
+};
+
+export const productPriceHandler: RouteHandler<
+  typeof productPriceRoute
+> = async (c) => {
+  const price = await prisma.products.aggregate({
+    _min: { salePrice: true },
+    _max: { salePrice: true },
+  });
+  return c.json({
+    minPrice: price._min.salePrice ?? 0,
+    maxPrice: price._max.salePrice ?? 100,
+  });
+};
+
+export const addToCartHandler: RouteHandler<typeof addToCartRoute> = async (
+  c,
+) => {
+  const { productId, quantity, color, size } = c.req.valid("json");
+  const user = c.get("user");
+  if (!user?.email) {
+    return c.json({ message: "Please login first" }, 401);
+  }
+  try {
+    const product = await prisma.addToCart.upsert({
+      where: { userEmail_productId: { productId, userEmail: user?.email } },
+      update: { color, size, quantity },
+      create: { color, productId, quantity, size, userEmail: user.email },
+    });
+  } catch (error) {
+    return c.json({ message: "Internal server error" }, 500);
+  }
+  return c.json({ message: "Success" }, 201);
+};
+
+export const allAddToCartHandler: RouteHandler<
+  typeof allAddToCartRoute
+> = async (c) => {
+  const user = c.get("user");
+  const cart = await prisma.addToCart.findMany({
+    where: { userEmail: user?.email },
+    orderBy: { updatedAt: "desc" },
+    include: {
+      product: { select: { title: true, images: true, salePrice: true } },
+    },
+  });
+  /**
+   * ============================================================
+   * 📌 Used kafka
+   * ============================================================
+   */
+  // producer.send("product.activity", {
+  //   value: JSON.stringify({ id, action: "cart" }),
+  // });
+  return c.json({ cart });
+};
+
+export const removeACartHandler: RouteHandler<typeof removeACartRoute> = async (
+  c,
+) => {
+  const { productId } = c.req.valid("json");
+  const user = c.get("user");
+  try {
+    await prisma.addToCart.delete({
+      where: {
+        userEmail_productId: { userEmail: user?.email as string, productId },
+      },
+    });
+  } catch (error) {
+    return c.json({ message: "ProductId not found" });
+  }
+  return c.json({ message: "Cart delete successfully" }, 201);
+};
+
+export const removeAllCartHandler: RouteHandler<
+  typeof removeAllCartRoute
+> = async (c) => {
+  const user = c.get("user");
+  try {
+    await prisma.addToCart.deleteMany({
+      where: {
+        userEmail: user?.email,
+      },
+    });
+  } catch (error) {
+    return c.json({ message: "Product not found" });
+  }
+  return c.json({ message: "Cart remove successfully" }, 201);
 };

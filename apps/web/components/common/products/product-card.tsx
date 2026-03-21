@@ -1,11 +1,14 @@
+"use client";
 import { fromatPrice } from "@/lib/lib";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { Eye } from "lucide-react";
 import Image from "next/image";
 import { WishlistButton } from "./wishlist-button";
-import { useWishlistData } from "@/hooks/use-wishlist";
+import { useWishlistData } from "@/hooks/products/use-wishlist";
 import Link from "next/link";
+import { useState } from "react";
+import { AddToCartButton } from "./add-to-cart-button";
 
 interface Props {
   image: string;
@@ -15,6 +18,7 @@ interface Props {
   price: number;
   basePrice: number;
   colors?: string[];
+  sizes?: string[];
   isTrending: string;
   productId: string;
   id: string;
@@ -29,10 +33,17 @@ export const ProductCard = ({
   colors,
   isTrending,
   productId,
+  sizes,
   id,
 }: Props) => {
   const { data } = useWishlistData();
   const isWishlisted = data?.find((obj) => obj.productId === productId);
+  const [selectedColor, setSelectedColor] = useState(
+    colors ? colors[0] : undefined,
+  );
+  const [selectedSize, setSelectedSize] = useState(
+    sizes ? sizes[sizes.length - 1] : undefined,
+  );
 
   return (
     <div className="relative border p-1 dark:border-none dark:p-0 group">
@@ -106,24 +117,56 @@ export const ProductCard = ({
                 {fromatPrice(basePrice)}
               </h4>
             </div>
-            {colors?.length ? (
-              <div className="flex flex-col items-center">
-                <p>Color</p>
-                <div className="flex gap-2">
-                  {colors.map((item) => (
-                    <div
-                      key={item}
-                      className="w-6 h-6 rounded-full border"
-                      style={{ backgroundColor: item }}
-                    />
-                  ))}
+            <div className="space-y-2">
+              {colors?.length ? (
+                <div className="flex flex-col items-center">
+                  <p>Color</p>
+                  <div className="flex gap-2">
+                    {colors.map((item) => (
+                      <button
+                        key={item}
+                        onClick={() => setSelectedColor(item)}
+                        className={cn(
+                          "w-6 h-6 rounded-full border cursor-pointer",
+                          selectedColor === item && "border-red-600",
+                        )}
+                        style={{ backgroundColor: item }}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              ""
-            )}
+              ) : (
+                ""
+              )}
+              {sizes?.length ? (
+                <div className="flex flex-col items-center">
+                  <p>Color</p>
+                  <div className="flex gap-2">
+                    {sizes.map((item) => (
+                      <button
+                        key={item}
+                        onClick={() => setSelectedSize(item)}
+                        className={cn(
+                          "w-6 h-6 rounded-full border cursor-pointer",
+                          selectedSize === item && "border-red-600",
+                        )}
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                ""
+              )}
+            </div>
           </div>
-          <Button className="w-full">Add to Cart</Button>
+          <AddToCartButton
+            productId={productId}
+            color={selectedColor}
+            size={selectedSize}
+            quantity={1}
+          />
         </div>
       </div>
     </div>

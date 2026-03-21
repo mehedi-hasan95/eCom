@@ -220,3 +220,15 @@ export const deleteProductSchema = z.object({
   id: z.string(),
   sellerEmail: z.string(),
 });
+
+export const addToCartSchema = z.object({
+  quantity: z
+    .number()
+    .positive()
+    .min(1)
+    .max(10, { message: "You can't add more than 10 products" })
+    .default(1),
+  size: z.string().optional(),
+  color: z.string().optional(),
+  productId: z.string(),
+});

@@ -7,8 +7,8 @@ import {
   DEFAULT_LIMIT,
   sortValueType,
 } from "@workspace/open-api/lib/constants";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { getAllProducts } from "@/lib/actions/product-action";
+import { useQuery, useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { getAllProducts, priceRangeAction } from "@/lib/actions/product-action";
 import { InfinityScroll } from "@/components/common/products/infinity-scroll";
 
 interface Props {
@@ -61,11 +61,16 @@ export const AllProductPage = ({ isManual = false }: Props) => {
       data.pages.flatMap((page) => page.products).map((p) => [p.id, p]),
     ).values(),
   );
+
+  const { data: price } = useQuery({
+    queryKey: ["price-range"],
+    queryFn: priceRangeAction,
+  });
   return (
     <div className="container-default flex relative">
       <div className="hidden lg:block w-1/4 bg-slate-200 dark:bg-slate-900 p-4 relative">
         <div className="sticky top-20">
-          <ProductsSidebar highPrice={100} />
+          <ProductsSidebar highPrice={price?.maxPrice ?? 100} />
         </div>
       </div>
 

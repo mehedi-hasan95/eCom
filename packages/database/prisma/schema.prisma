@@ -39,6 +39,7 @@ model User {
   ratings            Ratings[]
   wallets            Wallet[]
   creditTransactions CreditTransaction[]
+  addToCarts         AddToCart[]
 
   @@unique([email])
   @@map("user")
@@ -161,6 +162,7 @@ model Products {
   ratings         Ratings?
   productAnalyses ProductAnalysis?
   boostings       Boosting?
+  addToCarts      AddToCart[]
 
   @@index([id])
 }
@@ -244,4 +246,20 @@ model CreditTransaction {
 
   boostId String?
   boost   Boosting? @relation(fields: [boostId], references: [id])
+}
+
+model AddToCart {
+  id        String   @id @default(uuid())
+  quantity  Int      @default(1)
+  size      String?
+  color     String?
+  productId String
+  product   Products @relation(fields: [productId], references: [id])
+  userEmail String
+  user      User     @relation(fields: [userEmail], references: [email])
+  updatedAt DateTime @updatedAt
+
+  @@unique([userEmail, productId])
+  @@index([userEmail])
+  @@index([userEmail, productId])
 }

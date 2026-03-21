@@ -1,6 +1,6 @@
 "use client";
 import { ProductCard } from "@/components/common/products/product-card";
-import { useWishlistData } from "@/hooks/use-wishlist";
+import { useWishlistData } from "@/hooks/products/use-wishlist";
 import { Separator } from "@workspace/ui/components/separator";
 import { Heart } from "lucide-react";
 import Link from "next/link";

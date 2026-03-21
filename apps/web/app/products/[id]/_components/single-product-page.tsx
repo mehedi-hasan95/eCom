@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getSingleProductAction } from "@/lib/actions/product-action";
 import { NotFound } from "@/components/common/not-found";
 import { WishlistButton } from "@/components/common/products/wishlist-button";
-import { useWishlistData } from "@/hooks/use-wishlist";
+import { useWishlistData } from "@/hooks/products/use-wishlist";
 import { HtmlParser } from "@/components/common/html-parser";
 import { fromatPrice } from "@/lib/lib";
 import { Separator } from "@workspace/ui/components/separator";

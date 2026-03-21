@@ -1,7 +1,7 @@
 import { SearchParams } from "nuqs/server";
 import { loadSearchParams } from "@/hooks/nuqs/nuqs-server";
 import getQueryClient from "@/lib/query-client";
-import { getAllProducts } from "@/lib/actions/product-action";
+import { getAllProducts, priceRangeAction } from "@/lib/actions/product-action";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import {
   DEFAULT_LIMIT,
@@ -40,6 +40,11 @@ const Page = async ({ searchParams }: Props) => {
       }),
     initialPageParam: null,
     staleTime: 1000 * 60 * 5,
+  });
+
+  await queryClient.prefetchQuery({
+    queryKey: ["price-range"],
+    queryFn: priceRangeAction,
   });
 
   return (

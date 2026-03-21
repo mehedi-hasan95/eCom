@@ -1,6 +1,6 @@
 "use client";
 
-import { useWishlistData } from "@/hooks/use-wishlist";
+import { useWishlistData } from "@/hooks/products/use-wishlist";
 import { cn } from "@workspace/ui/lib/utils";
 import { Heart } from "lucide-react";
 import Link from "next/link";

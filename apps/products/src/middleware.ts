@@ -28,7 +28,7 @@ export const adminMiddleware = createMiddleware<Env>(async (c, next) => {
   if (!session) {
     c.set("user", null);
     c.set("session", null);
-    return c.json({ message: "Unauthorize" }, 401);
+    return c.json({ message: "Please login first" }, 401);
   }
   const findAdmin = await prisma.user.findUnique({
     where: { email: session.user.email },

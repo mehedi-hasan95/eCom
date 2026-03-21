@@ -1,7 +1,8 @@
-import { Products } from "@workspace/db";
+import { AddToCart, Products } from "@workspace/db";
 import { sortValueType } from "@workspace/open-api/lib/constants";
 import { shortUser } from "@workspace/open-api/schemas/other.schema";
 import {
+  addToCartSchema,
   deleteProductSchema,
   productCreateSchema,
   updateProductSchema,
@@ -201,4 +202,89 @@ export const getAllProducts = async (params: GetProductsParams) => {
     nextCursor: any;
   } = await response.json();
   return data;
+};
+
+export const priceRangeAction = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/products/price-range`,
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  const data: { minPrice: number; maxPrice: number } = await response.json();
+  return data;
+};
+
+export const createAddToCartAction = async (
+  data: z.input<typeof addToCartSchema>,
+) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/products/create-add-to-cart`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+      credentials: "include",
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  const cart = await response.json();
+  return cart;
+};
+
+export const getAddToCartAction = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/products/add-to-cart`,
+    { credentials: "include" },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  const data: {
+    cart: (AddToCart & {
+      product: { title: string; images: string[]; salePrice: number };
+    })[];
+  } = await response.json();
+  return data.cart;
+};
+
+export const removeACartAction = async (productId: string) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/products/remove-a-cart`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ productId }),
+      credentials: "include",
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  return response.json();
+};
+
+export const removeAllCartAction = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/products/remove-all-cart`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  return response.json();
 };
