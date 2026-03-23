@@ -4,25 +4,24 @@ import {
   useAddToCartData,
   useAddToCartMutationData,
 } from "@/hooks/products/use-add-to-cart";
-import { useGetSession } from "@/hooks/use-auth";
-import { createAddToCartAction } from "@/lib/actions/product-action";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AddToCart } from "@workspace/db";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { toast } from "sonner";
 
 interface Props {
   productId: string;
   quantity?: number;
   color?: string;
   size?: string;
+  usedCupon?: boolean;
+  className?: string;
 }
 export const AddToCartButton = ({
   productId,
   color,
   quantity,
   size,
+  usedCupon,
+  className,
 }: Props) => {
   const { mutatoin } = useAddToCartMutationData();
   const { data } = useAddToCartData();
@@ -30,8 +29,10 @@ export const AddToCartButton = ({
 
   return (
     <Button
-      onClick={() => mutatoin.mutate({ productId, color, quantity, size })}
-      className={cn("w-full")}
+      onClick={() =>
+        mutatoin.mutate({ productId, color, quantity, size, usedCupon })
+      }
+      className={cn("w-full flex-1", className)}
       disabled={!!isInCart?.productId}
     >
       {isInCart?.productId ? "Added to Cart" : "Add to Cart"}

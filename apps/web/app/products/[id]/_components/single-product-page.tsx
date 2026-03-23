@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart, Truck, Shield, RotateCcw } from "lucide-react";
+import { Truck, Shield, RotateCcw } from "lucide-react";
 import { ProductGallery } from "./product-gallery";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
@@ -17,6 +17,7 @@ import { HtmlParser } from "@/components/common/html-parser";
 import { fromatPrice } from "@/lib/lib";
 import { Separator } from "@workspace/ui/components/separator";
 import { StarRating } from "@/components/common/products/star-rating";
+import { AddToCartButton } from "@/components/common/products/add-to-cart-button";
 
 interface Props {
   id: string;
@@ -31,6 +32,21 @@ export const SingleProductPage = ({ id }: Props) => {
   const [selectedColor, setSelectedColor] = useState(data?.product?.color[0]);
   const [selectedSize, setSelectedSize] = useState(data?.product?.sizes[0]);
   const [quantity, setQuantity] = useState(1);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponError, setCouponError] = useState("");
+
+  const handleApplyCoupon = () => {
+    if (!data?.product?.cupon) return;
+
+    if (couponCode.trim() === data.product.cupon) {
+      setCouponApplied(true);
+      setCouponError("");
+    } else {
+      setCouponApplied(false);
+      setCouponError("Invalid coupon code");
+    }
+  };
 
   const { data: wishlistData } = useWishlistData();
 
@@ -47,7 +63,9 @@ export const SingleProductPage = ({ id }: Props) => {
   }
   const basePrice = data?.product?.basePrice ? data?.product?.basePrice : 0;
   const salePrice = data?.product?.salePrice ? data?.product?.salePrice : 0;
-  const discount = Math.round(((basePrice - salePrice) / basePrice) * 100);
+  const finalPrice = couponApplied ? salePrice - salePrice * 0.1 : salePrice;
+
+  const discount = Math.round(((basePrice - finalPrice) / basePrice) * 100);
 
   /**
    * ============================================================
@@ -58,7 +76,7 @@ export const SingleProductPage = ({ id }: Props) => {
 
   // console.log(data.specification);
 
-  const result = Object.fromEntries(
+  const specification = Object.fromEntries(
     (data.product.specification as { key: string; value: string }[]).map(
       (i) => [i.key, i.value],
     ),
@@ -143,7 +161,7 @@ export const SingleProductPage = ({ id }: Props) => {
             <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <span className="text-4xl font-bold text-foreground">
-                  {fromatPrice(salePrice)}
+                  {fromatPrice(finalPrice)}
                 </span>
                 <span className="text-lg text-muted-foreground line-through">
                   {fromatPrice(basePrice)}
@@ -153,7 +171,7 @@ export const SingleProductPage = ({ id }: Props) => {
                 </Badge>
               </div>
               <p className="text-sm text-green-600 font-medium">
-                Save ${(basePrice - salePrice).toFixed(2)}
+                Save ${(basePrice - finalPrice).toFixed(2)}
               </p>
             </div>
 
@@ -260,14 +278,14 @@ export const SingleProductPage = ({ id }: Props) => {
 
             {/* Action Buttons */}
             <div className="flex gap-3">
-              <Button
-                // onClick={handleAddToCart}
-                variant="outline"
-                className="flex-1 h-12 text-base"
-              >
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                Add to Cart
-              </Button>
+              <AddToCartButton
+                className="h-12"
+                productId={data.product.id}
+                color={selectedColor}
+                quantity={quantity}
+                size={selectedSize}
+                usedCupon={couponApplied === true ? true : false}
+              />
               <Button
                 // onClick={handleBuyNow}
                 className="flex-1 h-12 text-base bg-primary text-primary-foreground hover:bg-primary/90"
@@ -277,15 +295,54 @@ export const SingleProductPage = ({ id }: Props) => {
             </div>
 
             {/* Coupon Code */}
+
+            {/* todo: add cuppon functionality  */}
             {data?.product.cupon && (
-              <div className="rounded-lg bg-muted p-4">
-                <p className="text-sm text-muted-foreground">Use code</p>
-                <p className="text-lg font-bold text-foreground">
-                  {data?.product.cupon}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  for additional discount
-                </p>
+              <div className="rounded-lg bg-muted p-4 flex gap-2">
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground">Use code</p>
+                  <p className="text-lg font-bold text-foreground">
+                    {data?.product.cupon}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    for additional discount
+                  </p>
+                </div>
+                <div className="flex-1">
+                  <div className="rounded-lg bg-muted p-4 space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Have a coupon? Enter it below
+                    </p>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        placeholder="Enter coupon code"
+                        className="flex-1 h-10 px-3 rounded-lg border border-border bg-background text-sm"
+                      />
+
+                      <Button
+                        onClick={handleApplyCoupon}
+                        disabled={couponApplied}
+                        className="h-10"
+                      >
+                        Apply
+                      </Button>
+                    </div>
+
+                    {couponApplied && (
+                      <p className="text-sm text-green-600 font-medium">
+                        Coupon applied! You got 10% discount 🎉
+                      </p>
+                    )}
+
+                    {couponError && (
+                      <p className="text-sm text-red-500">{couponError}</p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -329,7 +386,7 @@ export const SingleProductPage = ({ id }: Props) => {
         </div>
 
         {/* Specifications */}
-        <ProductSpecs specification={result} />
+        <ProductSpecs specification={specification} />
 
         {/* Description */}
         <section className="mt-12 space-y-6">

@@ -20,7 +20,7 @@ import {
 import { AddToCart } from "@workspace/db";
 
 export const AddToCartPage = () => {
-  const { data: serverData } = useAddToCartData();
+  const { data } = useAddToCartData();
   const { mutatoin } = useAddToCartMutationData();
 
   // Local state for instant UI feedback
@@ -31,14 +31,14 @@ export const AddToCartPage = () => {
 
   // Sync local state with server data on load
   useEffect(() => {
-    if (serverData) {
+    if (data) {
       const initialQtys: Record<string, number> = {};
-      serverData.forEach((item) => {
+      data.forEach((item) => {
         initialQtys[item.productId] = item.quantity;
       });
       setLocalQuantities(initialQtys);
     }
-  }, [serverData]);
+  }, [data]);
 
   const handleUpdateQuantity = (productId: string, delta: number) => {
     const currentQty = localQuantities[productId] || 0;
@@ -130,7 +130,7 @@ export const AddToCartPage = () => {
           <h1 className="text-4xl font-bold mt-4">Shopping Cart</h1>
         </div>
 
-        {!serverData || serverData.length === 0 ? (
+        {!data || data.length === 0 ? (
           <Card className="text-center py-12">
             <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
             <Link href="/">
@@ -140,7 +140,7 @@ export const AddToCartPage = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4">
-              {serverData.map((item) => {
+              {data.map((item) => {
                 const displayQuantity =
                   localQuantities[item.productId] ?? item.quantity;
 
@@ -228,7 +228,7 @@ export const AddToCartPage = () => {
             </div>
 
             <div className="lg:col-span-1">
-              <CartSummary />
+              <CartSummary data={data} />
             </div>
           </div>
         )}

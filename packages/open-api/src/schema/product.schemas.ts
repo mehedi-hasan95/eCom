@@ -231,4 +231,5 @@ export const addToCartSchema = z.object({
   size: z.string().optional(),
   color: z.string().optional(),
   productId: z.string(),
+  usedCupon: z.boolean().default(false).optional(),
 });

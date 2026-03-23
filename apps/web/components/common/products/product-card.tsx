@@ -22,6 +22,7 @@ interface Props {
   isTrending: string;
   productId: string;
   id: string;
+  usedCupon?: string;
 }
 export const ProductCard = ({
   image,
@@ -35,6 +36,7 @@ export const ProductCard = ({
   productId,
   sizes,
   id,
+  usedCupon,
 }: Props) => {
   const { data } = useWishlistData();
   const isWishlisted = data?.find((obj) => obj.productId === productId);

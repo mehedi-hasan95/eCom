@@ -250,7 +250,7 @@ export const productPriceHandler: RouteHandler<
 export const addToCartHandler: RouteHandler<typeof addToCartRoute> = async (
   c,
 ) => {
-  const { productId, quantity, color, size } = c.req.valid("json");
+  const { productId, quantity, color, size, usedCupon } = c.req.valid("json");
   const user = c.get("user");
   if (!user?.email) {
     return c.json({ message: "Please login first" }, 401);
@@ -258,8 +258,15 @@ export const addToCartHandler: RouteHandler<typeof addToCartRoute> = async (
   try {
     const product = await prisma.addToCart.upsert({
       where: { userEmail_productId: { productId, userEmail: user?.email } },
-      update: { color, size, quantity },
-      create: { color, productId, quantity, size, userEmail: user.email },
+      update: { color, size, quantity, usedCupon },
+      create: {
+        color,
+        productId,
+        quantity,
+        size,
+        userEmail: user.email,
+        usedCupon,
+      },
     });
   } catch (error) {
     return c.json({ message: "Internal server error" }, 500);

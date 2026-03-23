@@ -253,6 +253,7 @@ model AddToCart {
   quantity  Int      @default(1)
   size      String?
   color     String?
+  usedCupon Boolean  @default(false)
   productId String
   product   Products @relation(fields: [productId], references: [id])
   userEmail String
