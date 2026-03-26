@@ -40,6 +40,7 @@ model User {
   wallets            Wallet[]
   creditTransactions CreditTransaction[]
   addToCarts         AddToCart[]
+  orders             Order[]
 
   @@unique([email])
   @@map("user")
@@ -163,6 +164,7 @@ model Products {
   productAnalyses ProductAnalysis?
   boostings       Boosting?
   addToCarts      AddToCart[]
+  orderItems      OrderItems[]
 
   @@index([id])
 }
@@ -261,6 +263,42 @@ model AddToCart {
   updatedAt DateTime @updatedAt
 
   @@unique([userEmail, productId])
+  @@unique([userEmail, id])
   @@index([userEmail])
   @@index([userEmail, productId])
+}
+
+model Order {
+  id         String       @id @default(cuid())
+  email      String
+  user       User         @relation(fields: [email], references: [email])
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  orderItems OrderItems[]
+
+  @@unique([id, email])
+  @@index([email])
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model OrderItems {
+  id        String      @id @default(cuid())
+  productId String
+  price     Float
+  product   Products    @relation(fields: [productId], references: [id])
+  quantity  Int         @default(1)
+  size      String?
+  color     String?
+  usedCupon Boolean     @default(false)
+  status    OrderStatus @default(PENDING)
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
