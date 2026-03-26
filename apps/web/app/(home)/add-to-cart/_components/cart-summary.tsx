@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import Link from "next/link";
 
 interface Props {
   data:
@@ -17,10 +16,16 @@ interface Props {
         product: { title: string; images: string[]; salePrice: number };
       })[]
     | [];
+  setStep: React.Dispatch<React.SetStateAction<1 | 2>>;
 }
-export const CartSummary = ({ data }: Props) => {
+export const CartSummary = ({ data, setStep }: Props) => {
   const totalPrice = data.reduce((total, item) => {
-    return total + item.product.salePrice * item.quantity;
+    return (
+      total +
+      (item.usedCupon
+        ? item.product.salePrice * item.quantity * 0.9
+        : item.product.salePrice * item.quantity)
+    );
   }, 0);
   const totalQuantity = data.length;
   return (
@@ -45,11 +50,9 @@ export const CartSummary = ({ data }: Props) => {
             <span>{fromatPrice(totalPrice)}</span>
           </div>
         </div>
-        <Link href="/checkout">
-          <Button className="w-full" size="lg">
-            Proceed to Checkout
-          </Button>
-        </Link>
+        <Button className="w-full" size="lg" onClick={() => setStep(2)}>
+          Proceed to Checkout
+        </Button>
       </CardContent>
     </Card>
   );
