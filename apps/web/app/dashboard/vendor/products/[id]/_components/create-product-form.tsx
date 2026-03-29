@@ -37,7 +37,7 @@ import {
   InputGroupInput,
 } from "@workspace/ui/components/input-group";
 import { PlusCircle, XIcon } from "lucide-react";
-import { InputController } from "../../../../../../components/common/form/input-controller";
+import { InputController } from "@/components/common/form/input-controller";
 import { TextareaController } from "@/components/common/form/textarea-controller";
 import { TagsController } from "@/components/common/form/tags-controller";
 import { RichTextEditor } from "./rich-text-editor";

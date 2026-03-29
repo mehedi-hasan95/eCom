@@ -15,6 +15,7 @@ import {
 import { utapi } from "@workspace/uploadthing";
 import { Prisma, prisma } from "@workspace/db";
 import { sortValueType } from "@workspace/open-api/lib/constants";
+import { producer } from "../utils/kafka";
 // import { producer } from "../utils/kafka";
 
 export const createProductHandler: RouteHandler<
@@ -82,9 +83,9 @@ export const getSingleProductHandler: RouteHandler<
    * 📌 Used Kafka
    * ============================================================
    */
-  // producer.send("product.activity", {
-  //   value: JSON.stringify({ id, action: "view-product" }),
-  // });
+  producer.send("product.activity", {
+    value: JSON.stringify({ id, action: "view-product" }),
+  });
   return c.json({ product, rating: ratingStats }, 200);
 };
 
