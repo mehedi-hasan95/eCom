@@ -74,6 +74,21 @@ const app = new Hono()
 
     return c.json({ clientSecret: session.client_secret });
   })
+  .get("/:session_id", async (c) => {
+    const { session_id } = c.req.param();
+    const session = await stripeClient.checkout.sessions.retrieve(
+      session_id as string,
+      {
+        expand: ["line_items"],
+      },
+    );
+
+    return c.json({
+      status: session.status,
+      paymentStatus: session.payment_status,
+      products: session.line_items,
+    });
+  })
   .post("/webhooks", async (c) => {
     const body = await c.req.text();
     const sig = c.req.header("stripe-signature");
@@ -118,7 +133,7 @@ const app = new Hono()
          * ============================================================
          */
 
-        producer.send("stripe.payment", {
+        await producer.send("stripe.payment", {
           value: JSON.stringify({
             orderItems,
             totalPrice: session.amount_total,

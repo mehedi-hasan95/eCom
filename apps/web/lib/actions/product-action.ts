@@ -92,7 +92,7 @@ export const getSingleProductAction = async (id: string) => {
         image: string | null;
         stripeCustomerId: string;
       };
-      productAnalyses: { productSale: number }[];
+      productAnalyses: { productSale: number };
     };
     rating: { _avg: { ratings: number | null }; _count: { _all: number } };
   } = await response.json();

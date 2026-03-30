@@ -39,7 +39,7 @@ const routes = app.route("/stripe", stripe);
  */
 const start = async () => {
   try {
-    Promise.all([await producer.connect(), await consumer.connect()]);
+    await Promise.all([producer.connect(), consumer.connect()]);
     await runKafkaSubscriptions();
     serve(
       {

@@ -26,26 +26,46 @@ export const createOrderAction = async (order: {
   payment_intent: string;
 }) => {
   try {
-    await prisma.order.create({
-      data: {
-        ...order.shipping,
-        totalPrice: order.totalPrice / 100,
-        isPaid: order.isPaid,
-        email: order.email,
-        payment_intent: order.payment_intent,
-        orderItems: {
-          create: order.orderItems.map((item) => ({
-            productId: item.productId,
-            price: item.price / 100,
-            color: item.color,
-            size: item.size,
-            usedCupon: item.usedCupon,
-            quantity: item.quantity,
-          })),
+    await Promise.all([
+      prisma.order.create({
+        data: {
+          ...order.shipping,
+          totalPrice: order.totalPrice / 100,
+          isPaid: order.isPaid,
+          email: order.email,
+          payment_intent: order.payment_intent,
+          orderItems: {
+            create: order.orderItems.map((item) => ({
+              productId: item.productId,
+              price: item.price / 100,
+              color: item.color,
+              size: item.size,
+              usedCupon: item.usedCupon,
+              quantity: item.quantity,
+            })),
+          },
         },
-      },
-    });
+      }),
+
+      //test
+      prisma.$transaction(
+        order.orderItems.flatMap((item) => [
+          prisma.productAnalysis.update({
+            where: { productId: item.productId },
+            data: { productSale: { increment: item.quantity } },
+          }),
+          prisma.addToCart.delete({
+            where: {
+              userEmail_productId: {
+                userEmail: order.email,
+                productId: item.productId,
+              },
+            },
+          }),
+        ]),
+      ),
+    ]);
   } catch (error) {
-    console.log("Fuck you!!!", error);
+    console.log("Something went wrong!!!", error);
   }
 };

@@ -83,7 +83,7 @@ export const getSingleProductHandler: RouteHandler<
    * 📌 Used Kafka
    * ============================================================
    */
-  producer.send("product.activity", {
+  await producer.send("product.activity", {
     value: JSON.stringify({ id, action: "view-product" }),
   });
   return c.json({ product, rating: ratingStats }, 200);
@@ -291,7 +291,7 @@ export const allAddToCartHandler: RouteHandler<
    * 📌 Used kafka
    * ============================================================
    */
-  // producer.send("product.activity", {
+  // await producer.send("product.activity", {
   //   value: JSON.stringify({ id, action: "cart" }),
   // });
   return c.json({ cart });

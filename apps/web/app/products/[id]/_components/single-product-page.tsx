@@ -74,15 +74,13 @@ export const SingleProductPage = ({ id }: Props) => {
    */
   const inWishlist = wishlistData?.find((obj) => obj.productId === id);
 
-  // console.log(data.specification);
-
   const specification = Object.fromEntries(
     (data.product.specification as { key: string; value: string }[]).map(
       (i) => [i.key, i.value],
     ),
   );
 
-  const productSale = data.product.productAnalyses[0]?.productSale ?? 0;
+  const productSale = data.product.productAnalyses.productSale ?? 0;
   return (
     <main className="min-h-screen bg-background">
       {/* Product Section */}
@@ -181,7 +179,7 @@ export const SingleProductPage = ({ id }: Props) => {
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-green-500"></div>
                   <span className="text-sm font-medium text-foreground">
-                    In Stock ({data.product.stock} available)
+                    In Stock ({data.product.stock - productSale} available)
                   </span>
                 </div>
               ) : (
@@ -267,7 +265,9 @@ export const SingleProductPage = ({ id }: Props) => {
                 </span>
                 <button
                   onClick={() =>
-                    setQuantity(Math.min(data.product.stock, quantity + 1))
+                    setQuantity(
+                      Math.min(data.product.stock - productSale, quantity + 1),
+                    )
                   }
                   className="h-10 w-10 rounded-lg border border-border hover:bg-muted transition flex items-center justify-center"
                 >

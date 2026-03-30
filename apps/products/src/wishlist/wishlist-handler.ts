@@ -21,7 +21,7 @@ export const createWishlistHandler: RouteHandler<
      * 📌 Used kafka
      * ============================================================
      */
-    producer.send("product.activity", {
+    await producer.send("product.activity", {
       value: JSON.stringify({ id, action: "wishlist" }),
     });
   } catch (error) {
