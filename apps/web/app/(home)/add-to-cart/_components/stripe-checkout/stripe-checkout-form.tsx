@@ -1,10 +1,15 @@
 "use client";
 
 import { PaymentElement, useCheckout } from "@stripe/react-stripe-js/checkout";
+import { shippingFormSchema } from "@workspace/open-api/schemas/product.schemas";
 import { Button } from "@workspace/ui/components/button";
 import { FormEvent, useState } from "react";
+import z from "zod";
 
-export const StripeCheckoutForm = () => {
+interface Props {
+  shipping: z.infer<typeof shippingFormSchema>;
+}
+export const StripeCheckoutForm = ({ shipping }: Props) => {
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -26,6 +31,18 @@ export const StripeCheckoutForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setMessage(null);
+
+    await checkout.updateShippingAddress({
+      name: "shipping_address",
+      address: {
+        country: shipping.country,
+        line1: shipping.line1,
+        line2: shipping.phone,
+        city: shipping.city,
+        postal_code: shipping.postal_code,
+        state: shipping.state,
+      },
+    });
 
     const confirmResult = await checkout.confirm();
 

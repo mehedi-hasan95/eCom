@@ -233,3 +233,14 @@ export const addToCartSchema = z.object({
   productId: z.string(),
   usedCupon: z.boolean().default(false).optional(),
 });
+
+export const shippingFormSchema = z.object({
+  line1: z.string().optional(),
+  postal_code: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  phone: z.string().regex(/^\+?\d+$/, {
+    message: "Phone number must contain only digits and an optional leading +",
+  }),
+  country: z.string(),
+});

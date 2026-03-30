@@ -4,7 +4,9 @@ import { stripeClient } from "../utils/stripe-client";
 import Stripe from "stripe";
 import { authMiddleware } from "../middleware";
 import { prisma } from "@workspace/db";
+import { producer } from "../utils/kafka";
 
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const app = new Hono()
   .post("/connect", async (c) => {
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
@@ -40,21 +42,7 @@ const app = new Hono()
     if (!products.length) {
       return c.json({ message: "You've no product in your cart 😭😭😭" });
     }
-    const order = await prisma.order.create({
-      data: {
-        email,
-        orderItems: {
-          create: products.map((item) => ({
-            price: item.product.salePrice,
-            productId: item.productId,
-            color: item.color,
-            quantity: item.quantity,
-            size: item.size,
-            usedCupon: item.usedCupon,
-          })),
-        },
-      },
-    });
+
     const line_items = products.map((item: any) => ({
       price_data: {
         currency: "usd",
@@ -65,6 +53,12 @@ const app = new Hono()
         ), // convert to cents
         product_data: {
           name: item.product.title,
+          metadata: {
+            id: item.productId,
+            color: item.color,
+            size: item.size,
+            usedCupon: item.usedCupon,
+          },
         },
       },
       quantity: item.quantity,
@@ -75,23 +69,79 @@ const app = new Hono()
       customer_email: email,
       line_items,
       mode: "payment",
-      metadata: {
-        email,
-        order: JSON.stringify(order.id),
-      },
       return_url: `http://localhost:3000/complete?session_id={CHECKOUT_SESSION_ID}`,
     });
 
     return c.json({ clientSecret: session.client_secret });
   })
   .post("/webhooks", async (c) => {
-    console.log("hit");
     const body = await c.req.text();
     const sig = c.req.header("stripe-signature");
-
     let event: Stripe.Event;
-    console.log("sig", sig);
-    return c.json({ message: "Done the api" });
+
+    try {
+      event = stripeClient.webhooks.constructEvent(body, sig!, endpointSecret!);
+    } catch (err) {
+      console.log(`⚠️ Webhook signature verification failed.`);
+      return c.json({ err: "Webhook signature verification failed." }, 400);
+    }
+
+    // Handle the event
+    switch (event.type) {
+      case "checkout.session.completed":
+        const session = event.data.object as Stripe.Checkout.Session;
+
+        // console.log(session);
+        const lineItems = await stripeClient.checkout.sessions.listLineItems(
+          session.id,
+          { expand: ["data.price.product"] },
+        );
+        const orderItems = lineItems.data.map((item) => ({
+          productId: (item.price?.product as Stripe.Product)?.metadata?.id,
+          color: (item.price?.product as Stripe.Product)?.metadata?.color,
+          size: (item.price?.product as Stripe.Product)?.metadata?.size,
+          usedCupon:
+            (item.price?.product as Stripe.Product)?.metadata?.usedCupon ===
+            "true"
+              ? true
+              : false,
+          quantity: item.quantity,
+          price: item.price?.unit_amount,
+        }));
+
+        const shipping_address =
+          session.collected_information?.shipping_details?.address;
+
+        /**
+         * ============================================================
+         * 📌 Used kafka
+         * ============================================================
+         */
+
+        producer.send("stripe.payment", {
+          value: JSON.stringify({
+            orderItems,
+            totalPrice: session.amount_total,
+            email: session.customer_details?.email,
+            isPaid: session.payment_status === "paid" ? true : false,
+            payment_intent: session.payment_intent,
+            shipping: {
+              line1: shipping_address?.line1,
+              postal_code: shipping_address?.postal_code,
+              city: shipping_address?.city,
+              state: shipping_address?.state,
+              phone: shipping_address?.line2,
+              country: session.customer_details?.address?.country,
+            },
+          }),
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    return c.json({ recived: true });
   });
 
 export default app;
