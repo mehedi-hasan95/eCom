@@ -39,9 +39,9 @@ export const StripeShippingForm = ({ onSubmitData, setStep }: Props) => {
   return (
     <Card className="w-full max-w-7xl">
       <CardHeader>
-        <CardTitle>Bug Report</CardTitle>
+        <CardTitle>Almost there! Where do we send it?</CardTitle>
         <CardDescription>
-          Help us improve by reporting bugs you encounter.
+          Add your delivery address so we can get your order to you.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -7,6 +7,7 @@ import {
   IdCard,
   Landmark,
   LayoutDashboard,
+  LineChart,
   List,
   PackagePlus,
   ShoppingBasket,
@@ -34,6 +35,11 @@ const adminMenus = [
   { name: "ADMIN", url: "/dashboard/admin", icon: UserCog },
   { name: "Category", url: "/dashboard/admin/categories", icon: Guitar },
   { name: "Sub Category", url: "/dashboard/admin/sub-categories", icon: List },
+  {
+    name: "Boosting Price",
+    url: "/dashboard/admin/boosting-price",
+    icon: LineChart,
+  },
 ];
 export const DashboardMainMenus = () => {
   const { user } = useGetSession();

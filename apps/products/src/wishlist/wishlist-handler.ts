@@ -16,14 +16,14 @@ export const createWishlistHandler: RouteHandler<
     const data = await prisma.wishList.create({
       data: { productId: id, userEmail: user?.email as string },
     });
-    /**
-     * ============================================================
-     * 📌 Used kafka
-     * ============================================================
-     */
-    await producer.send("product.activity", {
-      value: JSON.stringify({ id, action: "wishlist" }),
-    });
+    // /**
+    //  * ============================================================
+    //  * 📌 Used kafka
+    //  * ============================================================
+    //  */
+    // await producer.send("product.activity", {
+    //   value: JSON.stringify({ id, action: "wishlist" }),
+    // });
   } catch (error) {
     return c.json({ message: "Product not found" }, 404);
   }

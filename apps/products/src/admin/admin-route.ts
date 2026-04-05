@@ -177,3 +177,58 @@ export const updateSubCategoryRoute = createRoute({
     500: { description: "Internal server error" },
   },
 });
+
+export const createBoostingCoinRoute = createRoute({
+  method: "post",
+  path: "/boosting-coin",
+  summary: "Create boosting coin",
+  tags,
+  middleware: adminMiddleware,
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            coin: z.coerce.number().int().positive(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    201: { description: "OK" },
+    401: { description: "Unauthorize" },
+    500: { description: "Internal server error" },
+  },
+});
+
+export const allBoostingCoinRoute = createRoute({
+  method: "get",
+  path: "/all-boosting-coin",
+  summary: "All boostin coin",
+  tags,
+  middleware: adminMiddleware,
+  responses: {
+    200: { description: "OK" },
+    401: { description: "Unauthorize" },
+    500: { description: "Internal server error" },
+  },
+});
+
+export const activeBoostingCoinRoute = createRoute({
+  method: "post",
+  path: "/active-boosting-coin",
+  summary: "Active a boosting coin",
+  tags,
+  middleware: adminMiddleware,
+  request: {
+    body: {
+      content: { "application/json": { schema: z.object({ id: z.string() }) } },
+    },
+  },
+  responses: {
+    201: { description: "OK" },
+    401: { description: "Unauthorize" },
+    500: { description: "Internal server error" },
+  },
+});

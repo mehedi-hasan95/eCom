@@ -1,3 +1,4 @@
+import { BoostingCoin } from "@workspace/db";
 import {
   categorySchema,
   subCategorySchema,
@@ -131,6 +132,59 @@ export const updateSubCategoryAction = async (
     `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/admin/category/update-subcategory`,
     {
       method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  return response.json();
+};
+
+export const createBoostingCoinAction = async (data: { coin: number }) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/admin/boosting-coin`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  return response.json();
+};
+
+export const getAllBoostingCoinAction = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/admin/all-boosting-coin`,
+    {
+      credentials: "include",
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  const data: { coins: BoostingCoin[] } = await response.json();
+  return data.coins;
+};
+
+export const activeBoostingCoinAction = async (data: { id: string }) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/admin/active-boosting-coin`,
+    {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },

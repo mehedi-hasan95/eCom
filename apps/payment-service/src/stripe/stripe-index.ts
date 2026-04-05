@@ -103,6 +103,21 @@ const app = new Hono()
 
     // Handle the event
     switch (event.type) {
+      case "account.updated":
+        const account = event.data.object as Stripe.Account;
+
+        // /**
+        //  * ============================================================
+        //  * 📌 Used Kafka
+        //  * ============================================================
+        //  */
+        // await producer.send("stripe.connect", {
+        //   value: JSON.stringify({
+        //     email: account.email,
+        //     stripeCustomerId: account.id,
+        //   }),
+        // });
+        break;
       case "checkout.session.completed":
         const session = event.data.object as Stripe.Checkout.Session;
 
@@ -127,29 +142,29 @@ const app = new Hono()
         const shipping_address =
           session.collected_information?.shipping_details?.address;
 
-        /**
-         * ============================================================
-         * 📌 Used kafka
-         * ============================================================
-         */
+        // /**
+        //  * ============================================================
+        //  * 📌 Used kafka
+        //  * ============================================================
+        //  */
 
-        await producer.send("stripe.payment", {
-          value: JSON.stringify({
-            orderItems,
-            totalPrice: session.amount_total,
-            email: session.customer_details?.email,
-            isPaid: session.payment_status === "paid" ? true : false,
-            payment_intent: session.payment_intent,
-            shipping: {
-              line1: shipping_address?.line1,
-              postal_code: shipping_address?.postal_code,
-              city: shipping_address?.city,
-              state: shipping_address?.state,
-              phone: shipping_address?.line2,
-              country: session.customer_details?.address?.country,
-            },
-          }),
-        });
+        // await producer.send("stripe.payment", {
+        //   value: JSON.stringify({
+        //     orderItems,
+        //     totalPrice: session.amount_total,
+        //     email: session.customer_details?.email,
+        //     isPaid: session.payment_status === "paid" ? true : false,
+        //     payment_intent: session.payment_intent,
+        //     shipping: {
+        //       line1: shipping_address?.line1,
+        //       postal_code: shipping_address?.postal_code,
+        //       city: shipping_address?.city,
+        //       state: shipping_address?.state,
+        //       phone: shipping_address?.line2,
+        //       country: session.customer_details?.address?.country,
+        //     },
+        //   }),
+        // });
         break;
 
       default:
