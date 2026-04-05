@@ -1,5 +1,8 @@
 import { RouteHandler } from "@hono/zod-openapi";
 import {
+  activeBoostingCoinRoute,
+  allBoostingCoinRoute,
+  createBoostingCoinRoute,
   createCategoryRoute,
   createSubCategoryRoute,
   deleteCategoryRoute,
@@ -205,4 +208,77 @@ export const updateSubCategoryHandler: RouteHandler<
     data: { name, slug, categorySlug },
   });
   return c.json({ message: "Sub category updated successfully" }, 201);
+};
+
+export const createBoostingCoinHandler: RouteHandler<
+  typeof createBoostingCoinRoute
+> = async (c) => {
+  const { coin } = c.req.valid("json");
+  if (!coin) {
+    return c.json({ message: "Please add coin" }, 400);
+  }
+  try {
+    await prisma.boostingCoin.create({ data: { coin } });
+  } catch (error) {
+    return c.json({ message: "Something went wrong" }, 500);
+  }
+  return c.json({ success: true }, 201);
+};
+
+export const allBoostingCoinHandler: RouteHandler<
+  typeof allBoostingCoinRoute
+> = async (c) => {
+  const coins = await prisma.boostingCoin.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+  return c.json({ coins }, 200);
+};
+
+export const activeBoostingCoinHandler: RouteHandler<
+  typeof activeBoostingCoinRoute
+> = async (c) => {
+  const { id } = c.req.valid("json");
+  try {
+    const activeCoin = await prisma.boostingCoin.findUnique({
+      where: { id },
+      select: { isActive: true },
+    });
+    if (activeCoin) {
+      if (activeCoin.isActive) {
+        return c.json({ message: "Plan already exist" }, 200);
+      }
+      if (!activeCoin.isActive) {
+        const currentActive = await prisma.boostingCoin.findFirst({
+          where: { isActive: true },
+          select: { id: true },
+        });
+        if (currentActive && currentActive.id) {
+          const deactivate = await prisma.boostingCoin.update({
+            where: { id: currentActive.id },
+            data: { isActive: false },
+          });
+          if (deactivate) {
+            const newActive = await prisma.boostingCoin.update({
+              where: { id },
+              data: { isActive: true },
+            });
+            if (newActive) {
+              return c.json({ message: "New plan activated" }, 201);
+            }
+          }
+        } else {
+          const newActive = await prisma.boostingCoin.update({
+            where: { id },
+            data: { isActive: true },
+          });
+          if (newActive) {
+            return c.json({ message: "New plan activated" }, 201);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    return c.json({ message: "Something went wrong" }, 500);
+  }
+  return c.json({ message: "OK" });
 };

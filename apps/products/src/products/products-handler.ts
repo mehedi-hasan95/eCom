@@ -78,14 +78,14 @@ export const getSingleProductHandler: RouteHandler<
       _count: { _all: true },
     }),
   ]);
-  /**
-   * ============================================================
-   * 📌 Used Kafka
-   * ============================================================
-   */
-  await producer.send("product.activity", {
-    value: JSON.stringify({ id, action: "view-product" }),
-  });
+  // /**
+  //  * ============================================================
+  //  * 📌 Used Kafka
+  //  * ============================================================
+  //  */
+  // await producer.send("product.activity", {
+  //   value: JSON.stringify({ id, action: "view-product" }),
+  // });
   return c.json({ product, rating: ratingStats }, 200);
 };
 

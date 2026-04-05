@@ -1,14 +1,17 @@
 "use client";
 
 import { LoadingButton } from "@/components/common/loading-button";
+import { useGetSession } from "@/hooks/use-auth";
 import { stripeConnectAction } from "@/lib/actions/stripe-action";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { Card } from "@workspace/ui/components/card";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, CheckCircle, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 export const DashboardStripeForm = () => {
+  const { user } = useGetSession();
+
   const [activeStep, setActiveStep] = useState(1);
   const steps = [
     {
@@ -124,20 +127,26 @@ export const DashboardStripeForm = () => {
               Stripe Connect. Setup takes just 10 minutes.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Button
-                size="lg"
-                className="gap-2"
-                onClick={() => stripeConnectMutation.mutate()}
-              >
-                {stripeConnectMutation.isPending ? (
-                  <LoadingButton />
-                ) : (
-                  <>
-                    Start Your Setup <ChevronRight className="h-4 w-4" />
-                  </>
-                )}
-              </Button>
-              <Button size="lg" variant="outline">
+              {user?.stripeVerified ? (
+                <Button className="flex-1 cursor-not-allowed bg-gradient-to-r from-emerald-700 via-green-800 to-lime-800 text-white">
+                  Stripe Connected <CheckCircle className="text-white" />
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  className="gap-2"
+                  onClick={() => stripeConnectMutation.mutate()}
+                >
+                  {stripeConnectMutation.isPending ? (
+                    <LoadingButton />
+                  ) : (
+                    <>
+                      Start Your Setup <ChevronRight className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              )}
+              <Button size="lg" variant="outline" className="flex-1">
                 View Documentation
               </Button>
             </div>

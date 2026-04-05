@@ -310,3 +310,10 @@ model OrderItems {
   orderId   String
   order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
+
+model BoostingCoin {
+  id        String   @id @default(uuid())
+  coin      Int
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

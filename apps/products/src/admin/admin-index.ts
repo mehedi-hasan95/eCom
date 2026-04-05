@@ -1,6 +1,9 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { defaultHook } from "@workspace/open-api/lib/open-api-configuration";
 import {
+  activeBoostingCoinRoute,
+  allBoostingCoinRoute,
+  createBoostingCoinRoute,
   createCategoryRoute,
   createSubCategoryRoute,
   deleteCategoryRoute,
@@ -9,6 +12,9 @@ import {
   updateSubCategoryRoute,
 } from "./admin-route";
 import {
+  activeBoostingCoinHandler,
+  allBoostingCoinHandler,
+  createBoostingCoinHandler,
   createCategoryHandler,
   createSubCategoryHandler,
   deleteCategoryHandler,
@@ -27,6 +33,9 @@ app
   .openapi(deleteCategoryRoute, deleteCategoryHandler)
   .openapi(createSubCategoryRoute, createSubCategoryHandler)
   .openapi(deleteSubCategoryRoute, deleteSubCategoryHandler)
-  .openapi(updateSubCategoryRoute, updateSubCategoryHandler);
+  .openapi(updateSubCategoryRoute, updateSubCategoryHandler)
+  .openapi(createBoostingCoinRoute, createBoostingCoinHandler)
+  .openapi(allBoostingCoinRoute, allBoostingCoinHandler)
+  .openapi(activeBoostingCoinRoute, activeBoostingCoinHandler);
 
 export default app;
