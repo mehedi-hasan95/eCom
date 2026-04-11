@@ -175,9 +175,6 @@ type GetProductsParams = {
 
 export const getAllProducts = async (params: GetProductsParams) => {
   const searchParams = new URLSearchParams();
-  // if (params.search) {
-  //   searchParams.set("search", params.search);
-  // }
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {

@@ -36,7 +36,7 @@ const routes = app
 cron.schedule("0 * * * *", async () => {
   try {
     await prisma.boosting.updateMany({
-      where: { endAt: { gte: new Date() } },
+      where: { endAt: { lte: new Date() } },
       data: {
         spendingAvg: 0,
       },

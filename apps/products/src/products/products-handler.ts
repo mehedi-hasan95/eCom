@@ -23,6 +23,9 @@ export const createProductHandler: RouteHandler<
 > = async (c) => {
   const user = c.get("user");
   const data = await c.req.valid("form");
+  if (!user?.stripeVerified) {
+    return c.json({ message: "Please add stripe connect" }, 401);
+  }
   const uploadedImages = await utapi.uploadFiles(data?.images!);
 
   const imageLinks = uploadedImages.map((item) => item.data?.ufsUrl);

@@ -161,7 +161,7 @@ const app = new Hono()
         //       city: shipping_address?.city,
         //       state: shipping_address?.state,
         //       phone: shipping_address?.line2,
-        //       country: session.customer_details?.address?.country,
+        //       country: shipping_address?.country,
         //     },
         //   }),
         // });

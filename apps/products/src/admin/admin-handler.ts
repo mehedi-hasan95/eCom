@@ -229,7 +229,7 @@ export const allBoostingCoinHandler: RouteHandler<
   typeof allBoostingCoinRoute
 > = async (c) => {
   const coins = await prisma.boostingCoin.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: { coin: "asc" },
   });
   return c.json({ coins }, 200);
 };

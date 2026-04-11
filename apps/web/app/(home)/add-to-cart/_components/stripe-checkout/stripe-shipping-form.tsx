@@ -1,5 +1,6 @@
 "use client";
 import { InputController } from "@/components/common/form/input-controller";
+import { ModifyCombobox } from "@/components/common/modify/modify-combobox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { shippingFormSchema } from "@workspace/open-api/schemas/product.schemas";
 import { Button } from "@workspace/ui/components/button";
@@ -11,9 +12,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { Field, FieldGroup } from "@workspace/ui/components/field";
-import { useForm } from "react-hook-form";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@workspace/ui/components/field";
+import { Controller, useForm } from "react-hook-form";
 import z from "zod";
+import country from "@/lib/constants/country.json";
 
 type Props = {
   onSubmitData: (data: z.infer<typeof shippingFormSchema>) => void;
@@ -78,6 +85,27 @@ export const StripeShippingForm = ({ onSubmitData, setStep }: Props) => {
                 name="state"
                 title="State (optional)"
                 placeholder="e.g. Khulna"
+              />
+              <Controller
+                name="country"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Select Country</FieldLabel>
+                    <ModifyCombobox
+                      optoins={country.map((c) => ({
+                        label: c.name,
+                        value: c.code,
+                      }))}
+                      onChange={field.onChange}
+                      value={field.value}
+                      id="shipping-country"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
               />
             </div>
           </FieldGroup>
