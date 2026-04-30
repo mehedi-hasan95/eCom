@@ -3,6 +3,7 @@ import { defaultHook } from "@workspace/open-api/lib/open-api-configuration";
 import {
   forgetPasswordEmailRoute,
   forgetPasswordVerifyRoute,
+  getUserDetailsRoute,
   loginRoute,
   logoutRoute,
   registrationOtpRoute,
@@ -14,6 +15,7 @@ import {
 import {
   forgetPasswordEmailHandler,
   forgetPasswordVerifyHandler,
+  getUserDetailsHandler,
   loginHandler,
   logoutHandler,
   registrationHandler,
@@ -36,6 +38,7 @@ app
   .openapi(sessionRoute, sessionHandler)
   .openapi(forgetPasswordEmailRoute, forgetPasswordEmailHandler)
   .openapi(forgetPasswordVerifyRoute, forgetPasswordVerifyHandler)
-  .openapi(resetPasswordRoute, resetPasswordHandler);
+  .openapi(resetPasswordRoute, resetPasswordHandler)
+  .openapi(getUserDetailsRoute, getUserDetailsHandler);
 
 export default app;

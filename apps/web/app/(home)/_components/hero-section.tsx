@@ -3,74 +3,62 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { CircleChevronLeft, CircleChevronRight } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
-
-const data = [
-  {
-    id: "1",
-    image: "/1.jpg",
-    title: "DESIGN SLIDER",
-    topic: "Aerphone",
-    desc: "Lorem ipsum dolor sit amet.",
-    btn: "See More",
-    details: "Details info will be here",
-  },
-  {
-    id: "2",
-    image: "/2.jpg",
-    title: "DESIGN SLIDER 2",
-    topic: "Aerphone",
-    desc: "Lorem ipsum dolor sit amet.",
-    btn: "See More",
-    details: "Details info will be here",
-  },
-  {
-    id: "3",
-    image: "/3.jpg",
-    title: "DESIGN SLIDER 3",
-    topic: "Aerphone",
-    desc: "Lorem ipsum dolor sit amet.",
-    btn: "See More",
-    details: "Details info will be here",
-  },
-  {
-    id: "4",
-    image: "/4.jpg",
-    title: "DESIGN SLIDER 4",
-    topic: "Aerphone",
-    desc: "Lorem ipsum dolor sit amet.",
-    btn: "See More",
-    details: "Details info will be here",
-  },
-  {
-    id: "5",
-    image: "/5.jpg",
-    title: "DESIGN SLIDER 5",
-    topic: "Aerphone",
-    desc: "Lorem ipsum dolor sit amet.",
-    btn: "See More",
-    details: "Details info will be here",
-  },
-  {
-    id: "6",
-    image: "/4.jpg",
-    title: "DESIGN SLIDER 6",
-    topic: "Aerphone",
-    desc: "Lorem ipsum dolor sit amet.",
-    btn: "See More",
-    details: "Details info will be here",
-  },
-];
+import { useProductFilters } from "@/hooks/nuqs/use-nuqs";
+import {
+  DEFAULT_LIMIT,
+  sortValueType,
+} from "@workspace/open-api/lib/constants";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { getAllProducts } from "@/lib/actions/product-action";
+import { HtmlParser } from "@/components/common/html-parser";
+import { AddToCartButton } from "@/components/common/products/add-to-cart-button";
 
 export const HeroSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeDetails, setActiveDetails] = useState(false);
 
+  const [filters] = useProductFilters();
+  const cats =
+    typeof filters.cats === "string"
+      ? (filters.cats as string).split(",")
+      : Array.isArray(filters.cats)
+        ? filters.cats
+        : undefined;
+  const sort = filters.sort as sortValueType | undefined;
+  const maxPrice = filters.maxPrice ? Number(filters.maxPrice) : undefined;
+  const minPrice = filters.minPrice ? Number(filters.minPrice) : undefined;
+  const search = filters.search ?? "";
+
+  const { data } = useSuspenseInfiniteQuery({
+    queryKey: ["products", cats, sort, maxPrice, minPrice, search],
+    queryFn: ({ pageParam }) =>
+      getAllProducts({
+        cats,
+        sort,
+        maxPrice,
+        minPrice,
+        search,
+        cursor: pageParam,
+        limit: DEFAULT_LIMIT,
+      }),
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // 🔥 Deduplicate products
+  const products = Array.from(
+    new Map(
+      data.pages.flatMap((page) => page.products).map((p) => [p.id, p]),
+    ).values(),
+  );
+
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % data.length);
+    setCurrentIndex((prev) => (prev + 1) % products.length);
   };
 
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + data.length) % data.length);
+    setCurrentIndex((prev) => (prev - 1 + products.length) % products.length);
   };
 
   const handleActive = () => {
@@ -88,13 +76,13 @@ export const HeroSection = () => {
   }, [activeDetails, currentIndex]);
 
   const getPosition = (index: number) => {
-    const diff = (index - currentIndex + data.length) % data.length;
+    const diff = (index - currentIndex + products.length) % products.length;
 
     if (diff === 0) return "item-2";
     if (diff === 1) return `item-3 ${activeDetails && "hidden"}`;
     if (diff === 2) return `item-4 ${activeDetails && "hidden"}`;
-    if (diff === data.length - 1) return "item-1";
-    if (diff === data.length - 2) return "item-5";
+    if (diff === products.length - 1) return "item-1";
+    if (diff === products.length - 2) return "item-5";
 
     return "hidden-item";
   };
@@ -102,7 +90,7 @@ export const HeroSection = () => {
   return (
     <div className="carousel relative overflow-hidden h-[800px]">
       <div className="list absolute top-0 left-1/2 -translate-x-1/2 w-[1400px] max-w-[90%] h-[80%]">
-        {data.map((item, idx) => (
+        {products.map((item, idx) => (
           <div
             key={item.id}
             className={`absolute left-0 right-0 w-[70%] h-full transition-all duration-500 ease-in-out ${getPosition(
@@ -111,7 +99,7 @@ export const HeroSection = () => {
           >
             {/* IMAGE */}
             <Image
-              src={item.image}
+              src={item.images[0] as string}
               alt={item.title}
               width={500}
               height={500}
@@ -133,14 +121,14 @@ export const HeroSection = () => {
               )}
             >
               <div className="title text-2xl font-bold">{item.title}</div>
-              <div className="topic text-xl">{item.topic}</div>
-              <div className="des">{item.desc}</div>
+              <div className="topic text-xl">{item.categorySlug}</div>
+              <div className="des">{item.shortDescription}</div>
 
               <button
                 className="seeMore mt-4 px-4 py-2 bg-black text-white rounded cursor-pointer"
                 onClick={handleActive}
               >
-                {item.btn}
+                See More
               </button>
             </div>
 
@@ -152,7 +140,16 @@ export const HeroSection = () => {
                   "opacity-100 absolute right-0 w-1/2 text-right pointer-events-auto top-1/2 -translate-y-1/2",
               )}
             >
-              {item.details}
+              <h2 className="text-2xl font-bold">{item.title}</h2>
+              <HtmlParser html={item.description} />
+              <AddToCartButton
+                productId={item.id}
+                color={item.color[0] || undefined}
+                key={item.id}
+                size={item.sizes[0] || undefined}
+                quantity={1}
+                className="w-auto"
+              />
             </div>
           </div>
         ))}

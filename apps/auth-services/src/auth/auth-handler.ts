@@ -2,6 +2,7 @@ import { RouteHandler } from "@hono/zod-openapi";
 import {
   forgetPasswordEmailRoute,
   forgetPasswordVerifyRoute,
+  getUserDetailsRoute,
   loginRoute,
   logoutRoute,
   registrationOtpRoute,
@@ -220,5 +221,31 @@ export const resetPasswordHandler: RouteHandler<
       },
       error?.statusCode || 500,
     );
+  }
+};
+
+export const getUserDetailsHandler: RouteHandler<
+  typeof getUserDetailsRoute
+> = async (c) => {
+  const email = c.get("user")?.email;
+  try {
+    const data = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        email: true,
+        emailVerified: true,
+        id: true,
+        image: true,
+        name: true,
+        createdAt: true,
+        phone: true,
+        role: true,
+        stripeVerified: true,
+        updatedAt: true,
+      },
+    });
+    return c.json({ data });
+  } catch (error) {
+    return c.json({ message: "Internal server error" }, 500);
   }
 };

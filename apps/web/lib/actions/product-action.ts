@@ -1,4 +1,4 @@
-import { AddToCart, Products } from "@workspace/db";
+import { AddToCart, Order, OrderItems, Products } from "@workspace/db";
 import { sortValueType } from "@workspace/open-api/lib/constants";
 import { shortUser } from "@workspace/open-api/schemas/other.schema";
 import {
@@ -8,6 +8,7 @@ import {
   updateProductSchema,
 } from "@workspace/open-api/schemas/product.schemas";
 import z from "zod";
+import { OrderStatus } from "../@types/db-types";
 
 export const productCreateAction = async (
   data: z.input<typeof productCreateSchema>,
@@ -284,4 +285,224 @@ export const removeAllCartAction = async () => {
     throw error;
   }
   return response.json();
+};
+
+export const getProductMonthlyReport = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/reports/get-monthly-report`,
+    {
+      credentials: "include",
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  const data: {
+    data: { total_sales: number; total_quantity: number; month: Date }[];
+  } = await response.json();
+  return data.data;
+};
+
+export const getProductDailyReport = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/reports/get-report`,
+    {
+      credentials: "include",
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  const data: {
+    data: { total_sales: number; total_quantity: number; date: string }[];
+  } = await response.json();
+  return data.data;
+};
+
+export type OrdersResponse = {
+  data: (Order & {
+    orderItems: (OrderItems & {
+      product: { title: string; images: string[] };
+    })[];
+    user: { name: string };
+  })[];
+  meta: {
+    totalCount: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+};
+export const getResentOrderAction = async (data: {
+  limit: number;
+  page: number;
+}) => {
+  const params = new URLSearchParams({
+    limit: String(data.limit),
+    page: String(data.page),
+  });
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/reports/get-resent-order?${params.toString()}`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const result: OrdersResponse = await response.json();
+  return result;
+};
+
+export const getSellerSingleOrderAction = async (data: { id: string }) => {
+  const params = new URLSearchParams({
+    id: String(data.id),
+  });
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/reports/get-seller-single-order?${params.toString()}`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const result: {
+    data: OrderItems & {
+      order: Order;
+      product: { title: string; images: string[] };
+    };
+  } = await response.json();
+  return result.data;
+};
+
+export const updateSellerSingleOrderAction = async (data: {
+  id: string;
+  status: OrderStatus;
+}) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/reports/update-seller-single-order`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  return response.json();
+};
+
+/**
+ * ============================================================
+ * 📌 API: Product's report for admin
+ * ============================================================
+ */
+
+export const getAdminProductMonthlyReport = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/reports/get-admin-monthly-report`,
+    {
+      credentials: "include",
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  const data: {
+    data: { total_sales: number; total_quantity: number; month: Date }[];
+  } = await response.json();
+  return data.data;
+};
+
+//
+
+export const getAdminProductDailyReport = async () => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/reports/get-admin-report`,
+    {
+      credentials: "include",
+    },
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+  const data: {
+    data: { total_sales: number; total_quantity: number; date: string }[];
+  } = await response.json();
+  return data.data;
+};
+
+export const getAdminResentOrderAction = async (data: {
+  limit: number;
+  page: number;
+}) => {
+  const params = new URLSearchParams({
+    limit: String(data.limit),
+    page: String(data.page),
+  });
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/reports/get-admin-resent-order?${params.toString()}`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const result: OrdersResponse = await response.json();
+  return result;
+};
+
+export const getAdminSingleOrderAction = async (data: { id: string }) => {
+  const params = new URLSearchParams({
+    id: String(data.id),
+  });
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTS_URL}/reports/get-admin-single-order?${params.toString()}`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const result: {
+    data: OrderItems & {
+      order: Order;
+      product: { title: string; images: string[] };
+    };
+  } = await response.json();
+  return result.data;
 };
