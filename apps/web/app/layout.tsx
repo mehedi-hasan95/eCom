@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 
+//@ts-ignore
 import "@workspace/ui/globals.css";
 import { Providers } from "@/components/providers";
 import getQueryClient from "@/lib/query-client";
@@ -28,6 +29,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const queryClient = getQueryClient();
+
   await queryClient.prefetchQuery({
     queryKey: ["sessions"],
     queryFn: sessionAction,
@@ -41,7 +43,7 @@ export default async function RootLayout({
     queryFn: getWishlistAction,
   });
   await queryClient.prefetchQuery({
-    queryKey: ["wishlist"],
+    queryKey: ["cart"],
     queryFn: getAddToCartAction,
   });
   return (

@@ -47,7 +47,6 @@ export const createOrderAction = async (order: {
         },
       }),
 
-      //test
       prisma.$transaction(
         order.orderItems.flatMap((item) => [
           prisma.productAnalysis.update({

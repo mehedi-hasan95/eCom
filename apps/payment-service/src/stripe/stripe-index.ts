@@ -5,6 +5,7 @@ import Stripe from "stripe";
 import { authMiddleware } from "../middleware";
 import { prisma } from "@workspace/db";
 import { producer } from "../utils/kafka";
+import { createOrderAction } from "../utils/action/payment-update";
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const app = new Hono()
@@ -164,6 +165,27 @@ const app = new Hono()
         //       country: shipping_address?.country,
         //     },
         //   }),
+        // });
+
+        /**
+         * ============================================================
+         * 📌 API: Used for create order
+         * ============================================================
+         */
+        // await createOrderAction({
+        //   email: session.customer_details?.email!,
+        //   isPaid: session.payment_status === "paid" ? true : false,
+        //   orderItems,
+        //   payment_intent: session.payment_intent,
+        //   shipping: {
+        //     line1: shipping_address?.line1 as string,
+        //     postal_code: shipping_address?.postal_code,
+        //     city: shipping_address?.city,
+        //     state: shipping_address?.state,
+        //     phone: shipping_address?.line2,
+        //     country: shipping_address?.country,
+        //   },
+        //   totalPrice: session.amount_total,
         // });
         break;
 

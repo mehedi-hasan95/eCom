@@ -4,7 +4,16 @@ import Link from "next/link";
 import { Home } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 
-export const NotFound = () => {
+interface Props {
+  title?: string;
+  description?: string;
+  showMenu?: boolean;
+}
+export const NotFound = ({
+  title = "Page Not Found",
+  description = "We couldn't find what you're looking for.Let's get you back on track.",
+  showMenu = true,
+}: Props) => {
   return (
     <div className="bg-background text-foreground flex flex-col items-center justify-center px-4 py-16 overflow-hidden relative">
       {/* Animated gradient background */}
@@ -22,11 +31,10 @@ export const NotFound = () => {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="space-y-3">
               <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
-                Page Not Found
+                {title}
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-lg mx-auto leading-relaxed">
-                We couldn&rsquo;t find what you&rsquo;re looking for.
-                Let&rsquo;s get you back on track.
+                {description}
               </p>
             </div>
           </div>
@@ -43,24 +51,26 @@ export const NotFound = () => {
         </div>
 
         {/* Helpful Links Section */}
-        <div className="pt-12 border-t border-border">
-          <p className="text-sm text-muted-foreground mb-6">Popular Pages</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {[
-              { label: "Home", href: "/" },
-              { label: "About", href: "/about" },
-              { label: "Contact", href: "/contact" },
-            ].map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="px-4 py-2 rounded-lg border border-border hover:bg-accent/50 transition-colors text-sm font-medium text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
+        {showMenu && (
+          <div className="pt-12 border-t border-border">
+            <p className="text-sm text-muted-foreground mb-6">Popular Pages</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {[
+                { label: "Home", href: "/" },
+                { label: "About", href: "/about" },
+                { label: "Contact", href: "/contact" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-4 py-2 rounded-lg border border-border hover:bg-accent/50 transition-colors text-sm font-medium text-foreground"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

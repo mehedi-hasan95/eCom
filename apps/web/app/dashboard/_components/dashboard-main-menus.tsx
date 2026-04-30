@@ -3,6 +3,8 @@ import { useGetSession } from "@/hooks/use-auth";
 import { SidebarGroup } from "@workspace/ui/components/sidebar";
 import {
   BaggageClaim,
+  BaggageClaimIcon,
+  BellRing,
   Guitar,
   IdCard,
   Landmark,
@@ -10,8 +12,7 @@ import {
   LineChart,
   List,
   PackagePlus,
-  ShoppingBasket,
-  UserCog,
+  Users,
 } from "lucide-react";
 import { DashboardSidebarMenus } from "./dashboard-sidebar-menus";
 
@@ -22,17 +23,22 @@ const generalMenus = [
 ];
 
 const vendorMenus = [
-  { name: "Vendor", url: "/dashboard/vendor", icon: ShoppingBasket },
   {
     name: "Products",
     url: "/dashboard/vendor/products",
     icon: PackagePlus,
   },
   { name: "Orders", url: "/dashboard/vendor/orders", icon: BaggageClaim },
+  {
+    name: "Notification",
+    url: "/dashboard/vendor/notification",
+    icon: BellRing,
+  },
 ];
 
 const adminMenus = [
-  { name: "ADMIN", url: "/dashboard/admin", icon: UserCog },
+  { name: "Users", url: "/dashboard/admin/users", icon: Users },
+  { name: "Orders", url: "/dashboard/admin/orders", icon: BaggageClaimIcon },
   { name: "Category", url: "/dashboard/admin/categories", icon: Guitar },
   { name: "Sub Category", url: "/dashboard/admin/sub-categories", icon: List },
   {
@@ -55,7 +61,7 @@ export const DashboardMainMenus = () => {
       </SidebarGroup>
       <SidebarGroup>
         {user?.role === "ADMIN" && (
-          <DashboardSidebarMenus menus={adminMenus} sidebarLabel="Vendors" />
+          <DashboardSidebarMenus menus={adminMenus} sidebarLabel="Admin" />
         )}
       </SidebarGroup>
     </>

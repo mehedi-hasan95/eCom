@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
+
 const Page = async () => {
-  return <div>Vendor Page</div>;
+  redirect("/dashboard");
 };
 
 export default Page;

@@ -6,7 +6,7 @@ import {
   resetPasswordSchema,
   verifyRegistrationEmailSchema,
 } from "@workspace/open-api/schemas/auth.schemas";
-import { sellerMiddleware } from "../middleware";
+import { authMiddleware } from "../middleware";
 
 const tags = ["Authentication"];
 export const registrationRoute = createRoute({
@@ -287,5 +287,18 @@ export const resetPasswordRoute = createRoute({
         },
       },
     },
+  },
+});
+
+export const getUserDetailsRoute = createRoute({
+  method: "get",
+  path: "/user-details",
+  tags,
+  summary: "Get user details",
+  middleware: authMiddleware,
+  responses: {
+    200: { description: "OK" },
+    401: { description: "UNAUTHORIZE" },
+    500: { description: "Internal server error" },
   },
 });

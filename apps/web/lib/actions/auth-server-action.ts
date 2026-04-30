@@ -1,6 +1,6 @@
 "use server";
 
-import { User } from "@workspace/db";
+import { User, userRole } from "@workspace/db";
 import { cookies, headers } from "next/headers";
 
 //
@@ -41,4 +41,41 @@ export const logoutAction = async () => {
   }
   (await cookies()).delete("better-auth.session_token");
   return { success: true };
+};
+
+export const getUserDetailsAction = async () => {
+  const cookieStore = cookies();
+  const cookieHeader = (await cookieStore).toString();
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_AUTH_URL}/auth/user-details`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookieHeader,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  const data: {
+    data: {
+      email: string;
+      id: string;
+      name: string;
+      role: userRole;
+      phone: string | null;
+      stripeVerified: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+      emailVerified: boolean;
+      image: string | null;
+    } | null;
+  } = await response.json();
+  return data.data;
 };

@@ -42,6 +42,7 @@ export const AllProductPage = ({ isManual = false }: Props) => {
         }),
       initialPageParam: null,
       getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+      staleTime: 1000 * 60 * 5,
     });
 
   let sortLabel = "trending";

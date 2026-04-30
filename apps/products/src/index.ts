@@ -11,6 +11,7 @@ import products from "./products/products-index";
 import admin from "./admin/admin-index";
 import categories from "./categories/categories-index";
 import wishlist from "./wishlist/wishlist-index";
+import reports from "./reports/products-reports-index";
 import { prisma } from "@workspace/db";
 import { consumer, producer } from "./utils/kafka";
 import { runKafkaSubscriptions } from "./utils/subscriptions";
@@ -31,7 +32,8 @@ const routes = app
   .route("/products", products)
   .route("/admin", admin)
   .route("/categories", categories)
-  .route("/wishlist", wishlist);
+  .route("/wishlist", wishlist)
+  .route("/reports", reports);
 
 cron.schedule("0 * * * *", async () => {
   try {
